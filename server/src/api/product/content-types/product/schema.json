@@ -46,9 +46,9 @@
       "target": "api::cart.cart",
       "mappedBy": "products"
     },
-    "product_key": {
+    "product_keys": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "oneToMany",
       "target": "api::product-key.product-key",
       "mappedBy": "product"
     }
