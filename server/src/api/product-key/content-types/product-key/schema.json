@@ -1,0 +1,29 @@
+{
+  "kind": "collectionType",
+  "collectionName": "product_keys",
+  "info": {
+    "singularName": "product-key",
+    "pluralName": "product-keys",
+    "displayName": "ProductKey"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "keys": {
+      "type": "string"
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "product_key"
+    },
+    "product": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product.product",
+      "inversedBy": "product_key"
+    }
+  }
+}

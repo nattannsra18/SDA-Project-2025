@@ -80,6 +80,12 @@
       "relation": "oneToOne",
       "target": "api::cart.cart",
       "mappedBy": "users_permissions_user"
+    },
+    "product_key": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-key.product-key",
+      "mappedBy": "users_permissions_user"
     }
   }
 }
