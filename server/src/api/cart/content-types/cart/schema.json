@@ -21,6 +21,12 @@
       "relation": "manyToMany",
       "target": "api::product.product",
       "inversedBy": "carts"
+    },
+    "cart_items": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::cart-item.cart-item",
+      "mappedBy": "cart"
     }
   }
 }
