@@ -1,0 +1,23 @@
+{
+  "kind": "collectionType",
+  "collectionName": "genres",
+  "info": {
+    "singularName": "genre",
+    "pluralName": "genres",
+    "displayName": "Genre"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "products": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product.product",
+      "mappedBy": "genres"
+    }
+  }
+}
