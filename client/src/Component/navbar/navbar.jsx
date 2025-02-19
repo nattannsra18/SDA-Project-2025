@@ -1,6 +1,7 @@
 import "./navbar.css"
 import { GiLockedChest } from "react-icons/gi";
 import { FaSearch } from "react-icons/fa"; 
+import { Link } from 'react-router-dom';
 
 const Navbar = ()  =>  { 
     return (
@@ -22,20 +23,20 @@ const Navbar = ()  =>  {
         </div>
       </div>
       <div className="wrapper3">
-            <div className="link"> 
-                Store
+            <div className="store"> 
+             <Link className="link"> Store </Link>
             </div>
-            <div className="link">
-                Libery
+            <div className="libery">
+                <Link className="link" to="/libery">Libery</Link>
             </div>
-            <div className="link"> 
-                Cart
+            <div className="cart"> 
+                <Link className="link" to ="/cart"> Cart </Link>
             </div>
-            <div className="link">
-                Wishlist
+            <div className="wishlist">
+                <Link className="link"> Wishlist </Link>
             </div>
-            <div className="link">
-                About
+            <div className="about">
+                <Link className="link" to="/about"> About </Link>
             </div>
       </div>
       </div>

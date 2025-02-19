@@ -1,14 +1,13 @@
+import "./Product.css"
 
 
-
-
-const product = ()  =>  { 
+const Product = ()  =>  { 
     return (
-      <div className="Home">
-        <p>Product</p>
+      <div className="product">
+        <p className="text">Product</p>
       </div>
     )
   }
 
 
-export default  product
+export default  Product

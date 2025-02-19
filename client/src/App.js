@@ -6,7 +6,10 @@ import {
 import './App.css';
 import Navbar from "./Component/navbar/navbar";
 import Home from "./page/Home/home";
-
+import Product from "./page/Product/Product";
+import About from "./page/About/About";
+import Libery from "./page/libery/libery";
+import Cart from "./page/Cart/Cart";
 
 const Layout = () => { 
   return(
@@ -25,6 +28,22 @@ const router = createBrowserRouter([
     {
       path: "/",
       element : <Home/> ,
+    },
+    {
+      path: "/product",
+      element : <Product/> ,
+    },
+    {
+      path: "/about",
+      element : <About/> ,
+    },
+    {
+      path: "/libery",
+      element : <Libery/> ,
+    },
+    {
+      path: "/cart",
+      element : <Cart/> ,
     },
     ]
   },
