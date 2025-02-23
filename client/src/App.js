@@ -5,8 +5,8 @@ import {
 } from "react-router-dom";
 import './App.css';
 import Navbar from "./Component/navbar/navbar";
-import Home from "./page/Home/home";
-import Product from "./page/Product/Product";
+import Store from "./page/Store/Store";
+
 import About from "./page/About/About";
 import Libery from "./page/libery/libery";
 import Cart from "./page/Cart/Cart";
@@ -27,11 +27,7 @@ const router = createBrowserRouter([
     children : [
     {
       path: "/",
-      element : <Home/> ,
-    },
-    {
-      path: "/product",
-      element : <Product/> ,
+      element : <Store/> ,
     },
     {
       path: "/about",

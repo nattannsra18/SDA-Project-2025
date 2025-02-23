@@ -1,0 +1,13 @@
+
+
+.All_product{
+    margin-left: 150px;
+    display: grid;
+    .text{
+        font-size: medium;
+        font-weight: 650;
+    }
+    .Product{
+        margin-top: 7px;
+    }
+}
