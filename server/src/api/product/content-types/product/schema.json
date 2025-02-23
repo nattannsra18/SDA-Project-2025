@@ -4,7 +4,7 @@
   "info": {
     "singularName": "product",
     "pluralName": "products",
-    "displayName": "Product",
+    "displayName": "product",
     "description": ""
   },
   "options": {
@@ -34,23 +34,17 @@
         "audios"
       ]
     },
-    "genres": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::genre.genre",
-      "inversedBy": "products"
-    },
     "carts": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::cart.cart",
       "mappedBy": "products"
     },
-    "product_keys": {
+    "genres": {
       "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::product-key.product-key",
-      "mappedBy": "product"
+      "relation": "manyToMany",
+      "target": "api::genre.genre",
+      "inversedBy": "products"
     }
   }
 }

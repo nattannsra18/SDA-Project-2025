@@ -4,7 +4,7 @@
   "info": {
     "singularName": "genre",
     "pluralName": "genres",
-    "displayName": "Genre"
+    "displayName": "genre"
   },
   "options": {
     "draftAndPublish": true
