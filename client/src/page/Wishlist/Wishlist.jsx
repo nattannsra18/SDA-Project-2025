@@ -1,15 +1,15 @@
-import "./libery.css"
+import "./Wishlist.css"
 
 
-const Libery = ()  =>  { 
+const Wish_list = ()  =>  { 
     return (
       <div className="product">
         <p3 className="text">
-            Libery
+            Wish_list
         </p3>
       </div>
     )
   }
 
 
-export default  Libery
+export default  Wish_list

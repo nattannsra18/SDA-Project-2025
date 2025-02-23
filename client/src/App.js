@@ -6,7 +6,7 @@ import {
 import './App.css';
 import Navbar from "./Component/navbar/navbar";
 import Store from "./page/Store/Store";
-
+import Wish_list from "./page/Wishlist/Wishlist";
 import About from "./page/About/About";
 import Libery from "./page/libery/libery";
 import Cart from "./page/Cart/Cart";
@@ -40,6 +40,10 @@ const router = createBrowserRouter([
     {
       path: "/cart",
       element : <Cart/> ,
+    },
+    {
+      path: "/wish_list",
+      element : <Wish_list/> ,
     },
     ]
   },
