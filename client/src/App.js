@@ -12,6 +12,7 @@ import About from "./page/About/About";
 import Libery from "./page/libery/libery";
 import Cart from "./page/Cart/Cart";
 import Login from "./page/Login/login";
+import Product  from "./Component/Product/Product";
 
 const Layout = () => { 
   return(
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
     {
       path: "/wish_list",
       element : <Wish_list/> ,
+    },
+    {
+      path : "/product/:id",
+      element : <Product />
     },
     ]
   },
