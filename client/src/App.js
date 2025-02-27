@@ -10,6 +10,7 @@ import Wish_list from "./page/Wishlist/Wishlist";
 import About from "./page/About/About";
 import Libery from "./page/libery/libery";
 import Cart from "./page/Cart/Cart";
+import Login from "./page/Login/login";
 
 const Layout = () => { 
   return(
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
       element : <Wish_list/> ,
     },
     ]
+  },
+  {
+    path: "/login",
+    element: <Login/>, // แยกออกจาก Layout
   },
 ]);
 

@@ -61,6 +61,15 @@
     }
 }
 
+.wrapper4{
+  .user_icon {
+    font-size: 2rem; /* ปรับขนาดตามต้องการ */
+    cursor: pointer;
+    margin-left:  90px;
+  }
+  
+}
+
 .tab {
     padding: 10px;
     border-radius: 5px;
@@ -70,4 +79,6 @@
     background-color: #444448;
     border: 2px solid #000;
   }
+
+
   

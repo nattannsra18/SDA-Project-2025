@@ -2,10 +2,12 @@ import "./navbar.css";
 import { GiLockedChest } from "react-icons/gi";
 import { FaSearch } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
+import { FaUserCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const location = useLocation();
-
+  const navigate = useNavigate(); 
   return (
     <div className="navbar">
       <div className="wrapper1">
@@ -35,6 +37,11 @@ const Navbar = () => {
         </div>
         <div className={`tab ${location.pathname === "/about" ? "active" : ""}`}>
           <Link className="link" to="/about">About</Link>
+        </div>
+        <div className="wrapper4">
+          <div className="user_icon" onClick={() => navigate("/login")} style={{ cursor: "pointer" }}>
+            <FaUserCircle />
+          </div>
         </div>
       </div>
     </div>
