@@ -2,6 +2,7 @@ import {
   createBrowserRouter,
   RouterProvider,
   Outlet,
+  Navigate
 } from "react-router-dom";
 import './App.css';
 import Navbar from "./Component/navbar/navbar";
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
     path: "/",
     element : <Layout/>,
     children : [
+      {
+        path: "/",
+        element: <Navigate to="/store" replace />, // เพิ่ม redirect ตรงนี้
+      },
     {
       path: "/store",
       element : <Store/> ,
