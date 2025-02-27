@@ -1,0 +1,114 @@
+/* Container หลักของหน้า */
+.product-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #18181C; /* พื้นหลังสีเข้ม */
+    color: #fff;
+    border-radius: 8px;
+  }
+  
+  /* ส่วนรูปภาพสินค้า */
+  .product-image-container {
+    flex: 1;
+    max-width: 400px;
+    margin-right: 20px;
+  }
+  
+  .product-image-container img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  /* ป้ายใต้รูปภาพ */
+  .image-label {
+    display: flex;                   /* ใช้ Flexbox */
+    justify-content: space-between;  /* ให้ข้อความและไอคอนอยู่ขอบซ้าย-ขวา */
+    align-items: center;
+    width: 95%;                     /* กว้างเท่ารูปภาพ */
+    margin-top: 2.5px;                 /* เว้นระยะห่างจากรูป */
+    border-radius: 5px;
+    background-color: #1e6cb7;         /* สีฟ้า */
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  
+  /* ส่วนรายละเอียดสินค้า */
+  .product-details-container {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  
+  .product-details-container h2 {
+    margin-bottom: 10px;
+    font-size: 28px;
+    font-weight: bold;
+  }
+  
+  /* ข้อความรายละเอียด */
+  .product-description {
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  
+  /* ราคาสินค้า */
+  .product-price {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  /* ปุ่มต่าง ๆ */
+  .product-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .preorder-btn,
+  .add-cart-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .preorder-btn {
+    background-color: #18A77E;
+    color: #fff;
+  }
+  
+  .add-cart-btn {
+    background-color: #FFC439;
+    color: #fff;
+  }
+  
+  /* ข้อความ activation */
+  .product-activation p {
+    margin: 5px 0;
+    font-size: 16px;
+  }
+  
+  /* ไอคอนเช็กถูก */
+  .check-icon {
+    font-size: 18px;
+    color: green;
+    font-weight: bolder;
+    margin-right: 8px;
+  }
+  
+  /* (ตัวเลือก) กำหนดสไตล์เพิ่มเติมสำหรับไอคอนใน label ถ้าต้องการ */
+  .label-icon {
+    font-size: 18px;  /* ปรับขนาดตามที่ต้องการ */
+    /* สามารถเพิ่ม style อื่น ๆ ได้ตามใจชอบ */
+  }
+  

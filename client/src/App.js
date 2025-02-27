@@ -53,8 +53,8 @@ const router = createBrowserRouter([
       element : <Wish_list/> ,
     },
     {
-      path : "/product/:id",
-      element : <Product />
+      path: "/product/:documentId",
+      element: <Product />,
     },
     ]
   },
