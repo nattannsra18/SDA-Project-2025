@@ -13,7 +13,7 @@ import Libery from "./page/libery/libery";
 import Cart from "./page/Cart/Cart";
 import Login from "./page/Login/login";
 import Product  from "./Component/Product/Product";
-
+import Register from "./page/Register/Register";
 const Layout = () => { 
   return(
     <div className="app"> 
@@ -61,6 +61,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login/>, // แยกออกจาก Layout
+  },
+  {
+    path: "/regis",
+    element: <Register/>, // แยกออกจาก Layout
   },
 ]);
 

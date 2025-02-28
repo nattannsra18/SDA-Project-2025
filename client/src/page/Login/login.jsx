@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
 
+
 const Login = () => {
   const [credentials, setCredentials] = useState({
     identifier: "",
@@ -98,7 +99,7 @@ const Login = () => {
           </div>
           
           <div className="signup-link">
-            <a href="#">Click this for sing up</a>
+            <a href="/regis">Click this for sing up</a>
           </div>
           
           {error && <div className="error-message">{error}</div>}
