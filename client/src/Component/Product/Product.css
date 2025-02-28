@@ -6,12 +6,12 @@
     max-width: 1200px;
     margin: 50px auto;
     padding: 20px;
-    background-color: #18181C; /* พื้นหลังสีเข้ม */
+    background-color: #18181C; 
     color: #fff;
     border-radius: 8px;
   }
   
-  /* ส่วนรูปภาพสินค้า */
+
   .product-image-container {
     flex: 1;
     max-width: 400px;
@@ -24,15 +24,16 @@
     border-radius: 8px;
   }
   
-  /* ป้ายใต้รูปภาพ */
+
   .image-label {
-    display: flex;                   /* ใช้ Flexbox */
-    justify-content: space-between;  /* ให้ข้อความและไอคอนอยู่ขอบซ้าย-ขวา */
+    display: flex;                  
+    justify-content: space-between; 
     align-items: center;
-    width: 95%;                     /* กว้างเท่ารูปภาพ */
-    margin-top: 2.5px;                 /* เว้นระยะห่างจากรูป */
+    width: 100%;
+    height: 30%;            
+    margin-top: 1px;                
     border-radius: 5px;
-    background-color: #1e6cb7;         /* สีฟ้า */
+    background-color: #1e6cb7;     
     color: #fff;
     padding: 5px 10px;
     font-size: 14px;
@@ -53,20 +54,20 @@
     font-weight: bold;
   }
   
-  /* ข้อความรายละเอียด */
+
   .product-description {
     margin-bottom: 20px;
     line-height: 1.6;
   }
   
-  /* ราคาสินค้า */
+
   .product-price {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 20px;
   }
   
-  /* ปุ่มต่าง ๆ */
+ 
   .product-buttons {
     display: flex;
     gap: 10px;
@@ -91,14 +92,13 @@
     background-color: #FFC439;
     color: #fff;
   }
-  
-  /* ข้อความ activation */
+
   .product-activation p {
     margin: 5px 0;
     font-size: 16px;
   }
   
-  /* ไอคอนเช็กถูก */
+
   .check-icon {
     font-size: 18px;
     color: green;
@@ -106,9 +106,9 @@
     margin-right: 8px;
   }
   
-  /* (ตัวเลือก) กำหนดสไตล์เพิ่มเติมสำหรับไอคอนใน label ถ้าต้องการ */
+
   .label-icon {
-    font-size: 18px;  /* ปรับขนาดตามที่ต้องการ */
-    /* สามารถเพิ่ม style อื่น ๆ ได้ตามใจชอบ */
+    font-size: 18px;
+
   }
   
