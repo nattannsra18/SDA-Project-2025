@@ -42,7 +42,7 @@ const Navbar = () => {
     } catch (error) {
       console.error("Error fetching user data:", error);
       // If error fetching user data, token might be invalid
-      sessionStorage.removeItem("jwt");
+      sessionStorage.removeItem("token");
       navigate("/login");
     } finally {
       setLoading(false);
@@ -51,7 +51,7 @@ const Navbar = () => {
 
   // Function to handle logout
   const handleLogout = () => {
-    sessionStorage.removeItem("jwt");
+    sessionStorage.removeItem("token");
     setUserData(null);
     setShowModal(false);
     // Stay on current page as requested

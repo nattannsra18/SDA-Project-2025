@@ -1,0 +1,160 @@
+/* About.css */
+.about-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    background-color: #18181C;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .about-container h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    border-bottom: 2px solid #3D9BDC;
+    padding-bottom: 0.5rem;
+  }
+  
+  .about-container h2 {
+    font-size: 1.8rem;
+    color: #3D9BDC;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  
+  .about-container p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  
+  .about-container strong {
+    color: #3D9BDC;
+    font-weight: 600;
+  }
+  
+  .about-container ul, 
+  .about-container ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .about-container li {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+  }
+  
+  /* Converting markdown ** to styling */
+  .about-container p,
+  .about-container li {
+    position: relative;
+  }
+  
+  /* Add an animated gradient border around the container */
+  @keyframes borderGlow {
+    0% {
+      box-shadow: 0 0 5px 1px rgba(61, 155, 220, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 10px 3px rgba(61, 155, 220, 0.5);
+    }
+    100% {
+      box-shadow: 0 0 5px 1px rgba(61, 155, 220, 0.3);
+    }
+  }
+  
+  .about-container {
+    animation: borderGlow 4s infinite;
+    border: 1px solid #2a2a30;
+  }
+  
+  /* Style for bullet points */
+  .about-container ul {
+    list-style: none;
+  }
+  
+  .about-container ul li::before {
+    content: "•";
+    color: #3D9BDC;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+  }
+  
+  /* Style for ordered list numbers */
+  .about-container ol {
+    list-style: none;
+    counter-reset: item;
+  }
+  
+  .about-container ol li {
+    counter-increment: item;
+  }
+  
+  .about-container ol li::before {
+    content: counter(item) ".";
+    color: #3D9BDC;
+    font-weight: bold;
+    display: inline-block;
+    width: 1.5em;
+    margin-left: -1.5em;
+  }
+  
+  /* Enhance the "Join Extreme Chest today" text */
+  .about-container p:last-child {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #222227;
+    border-radius: 8px;
+    border-left: 4px solid #3D9BDC;
+  }
+  
+  /* Fix the Markdown double asterisks in your text */
+  .about-container p:first-of-type strong,
+  .about-container li strong {
+    color: #3D9BDC;
+    font-weight: 700;
+  }
+  
+  /* Media queries for responsiveness */
+  @media (max-width: 768px) {
+    .about-container {
+      padding: 1.5rem;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .about-container h1 {
+      font-size: 2rem;
+    }
+    
+    .about-container h2 {
+      font-size: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .about-container {
+      padding: 1rem;
+    }
+    
+    .about-container h1 {
+      font-size: 1.8rem;
+    }
+    
+    .about-container h2 {
+      font-size: 1.3rem;
+    }
+  }
