@@ -120,7 +120,6 @@ const Navbar = () => {
     <>
       <div className="navbar">
         <div className="wrapper1">
-          {/* ✅ คลิกที่โลโก้แล้วนำไปที่หน้า Home */}
           <GiLockedChest className="icon" onClick={handleLogoClick} style={{ cursor: "pointer" }} />
           <div className="extreme">Extreme Chest</div>
         </div>
@@ -154,9 +153,6 @@ const Navbar = () => {
           <div className={`tab ${location.pathname === "/cart" ? "active" : ""}`}>
             <Link className="link" to="/cart">Cart</Link>
           </div>
-          <div className={`tab ${location.pathname === "/wish_list" ? "active" : ""}`}>
-            <Link className="link" to="/wish_list">Wishlist</Link>
-          </div>
           <div className={`tab ${location.pathname === "/about" ? "active" : ""}`}>
             <Link className="link" to="/about">About</Link>
           </div>
@@ -168,7 +164,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* ✅ User Profile Modal */}
       {showModal && userData && (
         <div className="user-modal-overlay">
           <div className="user-modal-content">
@@ -207,7 +202,6 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* ✅ Loading Indicator */}
       {loading && (
         <div className="loading-overlay">
           <div className="loading-spinner"></div>
