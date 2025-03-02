@@ -4,7 +4,7 @@
   "info": {
     "singularName": "genre",
     "pluralName": "genres",
-    "displayName": "genre"
+    "displayName": "Genre"
   },
   "options": {
     "draftAndPublish": true
@@ -17,7 +17,7 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product.product",
-      "mappedBy": "genres"
+      "inversedBy": "genres"
     }
   }
 }

@@ -391,7 +391,7 @@ export interface ApiCartCart extends Struct.CollectionTypeSchema {
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::cart.cart'> &
       Schema.Attribute.Private;
-    products: Schema.Attribute.Relation<'manyToMany', 'api::product.product'>;
+    products: Schema.Attribute.Relation<'oneToMany', 'api::product.product'>;
     publishedAt: Schema.Attribute.DateTime;
     totalPrice: Schema.Attribute.String;
     totalQuantity: Schema.Attribute.Integer;
@@ -404,7 +404,7 @@ export interface ApiCartCart extends Struct.CollectionTypeSchema {
 export interface ApiGenreGenre extends Struct.CollectionTypeSchema {
   collectionName: 'genres';
   info: {
-    displayName: 'genre';
+    displayName: 'Genre';
     pluralName: 'genres';
     singularName: 'genre';
   };
@@ -449,15 +449,15 @@ export interface ApiProductKeyProductKey extends Struct.CollectionTypeSchema {
       'api::product-key.product-key'
     > &
       Schema.Attribute.Private;
+    owner: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    >;
     product: Schema.Attribute.Relation<'oneToOne', 'api::product.product'>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    users_permissions_user: Schema.Attribute.Relation<
-      'oneToOne',
-      'plugin::users-permissions.user'
-    >;
   };
 }
 
@@ -473,12 +473,14 @@ export interface ApiProductProduct extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    age: Schema.Attribute.String;
+    age1: Schema.Attribute.Integer;
     amount: Schema.Attribute.Integer;
-    carts: Schema.Attribute.Relation<'manyToMany', 'api::cart.cart'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     description: Schema.Attribute.Text;
+    genre: Schema.Attribute.String;
     genres: Schema.Attribute.Relation<'manyToMany', 'api::genre.genre'>;
     image: Schema.Attribute.Media<
       'images' | 'files' | 'videos' | 'audios',
@@ -957,6 +959,7 @@ export interface PluginUsersPermissionsUser
   };
   attributes: {
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    cart: Schema.Attribute.Relation<'oneToOne', 'api::cart.cart'>;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     createdAt: Schema.Attribute.DateTime;
@@ -979,8 +982,8 @@ export interface PluginUsersPermissionsUser
         minLength: 6;
       }>;
     phone_number: Schema.Attribute.BigInteger;
-    product_key: Schema.Attribute.Relation<
-      'oneToOne',
+    product_keys: Schema.Attribute.Relation<
+      'oneToMany',
       'api::product-key.product-key'
     >;
     provider: Schema.Attribute.String;

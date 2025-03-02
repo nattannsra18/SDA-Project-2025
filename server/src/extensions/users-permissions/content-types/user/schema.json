@@ -65,14 +65,20 @@
       "inversedBy": "users",
       "configurable": false
     },
-    "product_key": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::product-key.product-key",
-      "mappedBy": "users_permissions_user"
-    },
     "phone_number": {
       "type": "biginteger"
+    },
+    "cart": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::cart.cart",
+      "mappedBy": "cart_owner"
+    },
+    "product_keys": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-key.product-key",
+      "mappedBy": "owner"
     }
   }
 }

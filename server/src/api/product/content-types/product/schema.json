@@ -34,17 +34,20 @@
         "audios"
       ]
     },
-    "carts": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::cart.cart",
-      "mappedBy": "products"
+    "age": {
+      "type": "string"
+    },
+    "age1": {
+      "type": "integer"
+    },
+    "genre": {
+      "type": "string"
     },
     "genres": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::genre.genre",
-      "inversedBy": "products"
+      "mappedBy": "products"
     }
   }
 }

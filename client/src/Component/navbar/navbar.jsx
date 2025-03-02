@@ -96,8 +96,8 @@ const Navbar = () => {
           <div className={`tab ${location.pathname === "/store" ? "active" : ""}`}>
             <Link className="link" to="/store">Store</Link>
           </div>
-          <div className={`tab ${location.pathname === "/libery" ? "active" : ""}`}>
-            <Link className="link" to="/libery">Library</Link>
+          <div className={`tab ${location.pathname === "/Library" ? "active" : ""}`}>
+            <Link className="link" to="/Library">Library</Link>
           </div>
           <div className={`tab ${location.pathname === "/cart" ? "active" : ""}`}>
             <Link className="link" to="/cart">Cart</Link>

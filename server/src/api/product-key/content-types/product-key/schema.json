@@ -14,11 +14,11 @@
     "key": {
       "type": "string"
     },
-    "users_permissions_user": {
+    "owner": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
-      "inversedBy": "product_key"
+      "inversedBy": "product_keys"
     },
     "product": {
       "type": "relation",

@@ -9,7 +9,7 @@ import Navbar from "./Component/navbar/navbar";
 import Store from "./page/Store/Store";
 import Wish_list from "./page/Wishlist/Wishlist";
 import About from "./page/About/About";
-import Libery from "./page/libery/libery";
+import Library from "./page/Library/Library";
 import Cart from "./page/Cart/Cart";
 import Login from "./page/Login/login";
 import Product  from "./Component/Product/Product";
@@ -42,8 +42,8 @@ const router = createBrowserRouter([
       element : <About/> ,
     },
     {
-      path: "/libery",
-      element : <Libery/> ,
+      path: "/library",
+      element : <Library/> ,
     },
     {
       path: "/cart",

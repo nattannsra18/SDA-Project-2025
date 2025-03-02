@@ -19,14 +19,14 @@
     },
     "products": {
       "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::product.product",
-      "inversedBy": "carts"
+      "relation": "oneToMany",
+      "target": "api::product.product"
     },
     "cart_owner": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "plugin::users-permissions.user"
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "cart"
     }
   }
 }
