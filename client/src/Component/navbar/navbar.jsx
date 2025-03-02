@@ -83,6 +83,9 @@ const Navbar = () => {
         </div>
       </div>
       <div className="wrapper3">
+        <div className={`tab ${location.pathname === "/home" ? "active" : ""}`}>
+          <Link className="link" to="/home">Home</Link>
+        </div>
         <div className={`tab ${location.pathname === "/store" ? "active" : ""}`}>
           <Link className="link" to="/store">Store</Link>
         </div>

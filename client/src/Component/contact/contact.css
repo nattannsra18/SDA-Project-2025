@@ -1,0 +1,90 @@
+.contact{ 
+    margin-top: 50px;
+    background-color: #121212;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.wrapper{ 
+    width: 80%;
+    max-width: 1200px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.wrapper span {
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #e0e0e0;
+}
+
+.mail {
+    display: flex;
+}
+
+.mail input{ 
+    padding: 12px 15px;
+    border: none;
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border-radius: 5px 0 0 5px;
+    width: 250px;
+    outline: none;
+}
+
+.mail input::placeholder {
+    color: #999;
+}
+
+.mail button{ 
+    padding: 12px 20px;
+    color: white;
+    background-color: #404eed; /* Discord blue-ish color */
+    border-radius: 0 5px 5px 0;
+    border: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.mail button:hover {
+    background-color: #5865f2;
+}
+
+.icons{ 
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.icon {
+    font-size: 22px;
+    color: #a0a0a0;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.2s;
+}
+
+.icon:hover {
+    color: white;
+    transform: translateY(-3px);
+}
+
+@media (max-width: 768px) {
+    .wrapper {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+    
+    .mail input {
+        width: 200px;
+    }
+}

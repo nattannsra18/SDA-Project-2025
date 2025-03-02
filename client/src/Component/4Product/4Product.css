@@ -1,0 +1,85 @@
+/* All_Product.css */
+.all-product-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 25px;
+    background-color: #0F0F0F     ;
+    padding: 20px;
+
+    color: white;
+  }
+  
+  .all-product-title {
+    font-size: 24px;
+    margin-bottom: 40px;
+    font-weight: bold;
+  }
+  
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  
+  .product-card {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #0F0F0F;
+    transition: transform 0.2s;
+  }
+  
+  .product-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .product-image {
+    position: relative;
+    height: 0;
+    padding-bottom: 100%; /* สร้าง aspect ratio 1:1 */
+    overflow: hidden;
+  }
+  
+  .product-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+
+  
+  .product-info {
+    padding: 12px 8px;
+  }
+  
+  .product-info h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .product-price {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  /* รองรับหน้าจอขนาดเล็ก */
+  @media (max-width: 1024px) {
+    .products-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .products-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+  }

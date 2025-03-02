@@ -14,6 +14,7 @@ import Cart from "./page/Cart/Cart";
 import Login from "./page/Login/login";
 import Product  from "./Component/Product/Product";
 import Register from "./page/Register/Register";
+import Home from "./page/Home/Home";
 const Layout = () => { 
   return(
     <div className="app"> 
@@ -30,7 +31,7 @@ const router = createBrowserRouter([
     children : [
       {
         path: "/",
-        element: <Navigate to="/store" replace />, // เพิ่ม redirect ตรงนี้
+        element: <Navigate to="/home" replace />,
       },
     {
       path: "/store",
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
     {
       path: "/product/:documentId",
       element: <Product />,
+    },
+    {
+      path: "/home",
+      element: <Home/>,
     },
     ]
   },
