@@ -3,8 +3,8 @@ import { GiLockedChest } from "react-icons/gi";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import "./login.css";
-
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -12,8 +12,7 @@ const Login = () => {
     password: ""
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [error, setError] = useState("");
+  const [submitEnabled, setSubmitEnabled] = useState(true);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -26,27 +25,78 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitEnabled(false);
+  
     try {
       const response = await axios.post("http://localhost:1337/api/auth/local", {
         identifier: credentials.identifier,
         password: credentials.password
       });
-      
-      // If successful, show success modal
-      if (response.data) {
-        // Store token/user info if needed
-        sessionStorage.setItem("token", response.data.jwt);
-        setShowModal(true);
-      }
-    } catch (error) {
-      setError("Login failed. Please check your credentials.");
-      console.error("Login error:", error);
-    }
-  };
 
-  const handleModalClose = () => {
-    setShowModal(false);
-    navigate("/store");
+      // Logging detailed user information
+      console.log('--- Login Response Details ---');
+      console.log('Full Response:', response.data);
+      console.log('JWT Token:', response.data.jwt);
+      console.log('User ID:', response.data.user.id);
+      console.log('Username:', response.data.user.username);
+      console.log('User Email:', response.data.user.email);
+      
+      // Store user information in session storage
+      sessionStorage.setItem("token", response.data.jwt);
+      sessionStorage.setItem("userId", response.data.user.id);
+      sessionStorage.setItem("username", response.data.user.username);
+      
+      // Log stored session storage items
+      console.log('--- Stored Session Data ---');
+      console.log('Stored Token:', sessionStorage.getItem("token"));
+      console.log('Stored User ID:', sessionStorage.getItem("userId"));
+      console.log('Stored Username:', sessionStorage.getItem("username"));
+      // Set default authorization header
+      axios.defaults.headers.common = {
+        Authorization: `Bearer ${response.data.jwt}`,
+      };
+      
+      // Customize SweetAlert2 to match the website's UI
+      await Swal.fire({
+        title: 'Login Successful',
+        text: 'Welcome to Extreme Chest!',
+        icon: 'success',
+        confirmButtonText: 'Continue',
+        customClass: {
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          content: 'custom-swal-content',
+          confirmButton: 'custom-swal-confirm-button'
+        },
+        background: '#18181C',
+        color: '#ffffff',
+        confirmButtonColor: '#3D9BDC'
+      });
+  
+      // Navigate to store page
+      navigate("/store");
+    } catch (error) {
+      console.error("Login Error:", error);
+      
+      // Customized error SweetAlert
+      Swal.fire({
+        title: 'Login Failed', 
+        text: 'Please check your username or password',
+        icon: 'error',
+        confirmButtonText: 'Try Again',
+        customClass: {
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          content: 'custom-swal-content',
+          confirmButton: 'custom-swal-confirm-button'
+        },
+        background: '#18181C',
+        color: '#ffffff',
+        confirmButtonColor: '#D70000'
+      });
+  
+      setSubmitEnabled(true);
+    }
   };
 
   return (
@@ -60,15 +110,15 @@ const Login = () => {
           <GiLockedChest size={64} color="#fff" />
         </div>
         
-        <h2 className="sign-in-text">Sing In</h2>
+        <h2 className="sign-in-text">Sign In</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="input-group">
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="identifier">Email or Username</label>
             <div className="input-container">
               <input
-                type="email"
-                id="email"
+                type="text"
+                id="identifier"
                 name="identifier"
                 value={credentials.identifier}
                 onChange={handleChange}
@@ -99,29 +149,18 @@ const Login = () => {
           </div>
           
           <div className="signup-link">
-            <a href="/regis">Click this for sing up</a>
+            <a href="/regis">Click here to sign up</a>
           </div>
           
-          {error && <div className="error-message">{error}</div>}
-          
-          <button type="submit" className="login-button">
-            sing in
+          <button 
+            type="submit" 
+            className="login-button"
+            disabled={!submitEnabled}
+          >
+            Sign In
           </button>
         </form>
       </div>
-      
-      {/* Success Modal */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Login Successful</h2>
-            <p>You have successfully logged in!</p>
-            <button onClick={handleModalClose} className="modal-button">
-              OK
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

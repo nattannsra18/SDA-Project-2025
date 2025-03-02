@@ -3,6 +3,7 @@ import { GiLockedChest } from "react-icons/gi";
 import { FaEye, FaEyeSlash, FaEnvelope, FaUser } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import "./Register.css";
 
 const Register = () => {
@@ -14,8 +15,7 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [error, setError] = useState("");
+  const [submitEnabled, setSubmitEnabled] = useState(true);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,10 +28,26 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitEnabled(false);
     
-    // Check if passwords match
+    // Validate password match
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      Swal.fire({
+        title: 'Password Mismatch', 
+        text: 'Passwords do not match. Please try again.',
+        icon: 'error',
+        confirmButtonText: 'Try Again',
+        customClass: {
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          content: 'custom-swal-content',
+          confirmButton: 'custom-swal-confirm-button'
+        },
+        background: '#18181C',
+        color: '#ffffff',
+        confirmButtonColor: '#D70000'
+      });
+      setSubmitEnabled(true);
       return;
     }
     
@@ -42,24 +58,54 @@ const Register = () => {
         password: formData.password
       });
       
-      if (response.data && response.data.jwt) {
-        // Store JWT token in sessionStorage
-        sessionStorage.setItem("token", response.data.jwt);
-        // Show success modal
-        setShowModal(true);
-      }
-    } catch (error) {
-      setError(
-        error.response?.data?.error?.message || 
-        "Registration failed. Please try again."
-      );
-      console.error("Registration error:", error);
-    }
-  };
+      // Logging registration details
+      console.log('--- Registration Response Details ---');
+      console.log('Full Response:', response.data);
+      console.log('User ID:', response.data.user.id);
+      console.log('Username:', response.data.user.username);
+      console.log('User Email:', response.data.user.email);
+      
+      // Show success message
+      await Swal.fire({
+        title: 'Registration Successful',
+        text: 'Welcome to Extreme Chest!',
+        icon: 'success',
+        confirmButtonText: 'Continue',
+        customClass: {
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          content: 'custom-swal-content',
+          confirmButton: 'custom-swal-confirm-button'
+        },
+        background: '#18181C',
+        color: '#ffffff',
+        confirmButtonColor: '#3D9BDC'
+      });
 
-  const handleModalClose = () => {
-    setShowModal(false);
-    navigate("/store");
+      // Navigate to login page
+      navigate("/login");
+    } catch (error) {
+      console.error("Registration Error:", error);
+      
+      // Show error message
+      Swal.fire({
+        title: 'Registration Failed', 
+        text: error.response?.data?.error?.message || 'Unable to create account',
+        icon: 'error',
+        confirmButtonText: 'Try Again',
+        customClass: {
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          content: 'custom-swal-content',
+          confirmButton: 'custom-swal-confirm-button'
+        },
+        background: '#18181C',
+        color: '#ffffff',
+        confirmButtonColor: '#D70000'
+      });
+
+      setSubmitEnabled(true);
+    }
   };
 
   return (
@@ -135,7 +181,7 @@ const Register = () => {
           </div>
           
           <div className="input-group">
-            <label htmlFor="confirmPassword">Confirm password</label>
+            <label htmlFor="confirmPassword">Confirm Password</label>
             <div className="input-container password-container">
               <div className="input-icon">
                 <FaUser />
@@ -158,26 +204,19 @@ const Register = () => {
             </div>
           </div>
           
-          {error && <div className="error-message">{error}</div>}
+          <div className="signup-link">
+            <a href="/login">Already have an account? Sign in</a>
+          </div>
           
-          <button type="submit" className="continue-button">
-            Continue
+          <button 
+            type="submit" 
+            className="continue-button"
+            disabled={!submitEnabled}
+          >
+            Create Account
           </button>
         </form>
       </div>
-      
-      {/* Success Modal */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Registration Successful</h2>
-            <p>Your account has been created successfully!</p>
-            <button onClick={handleModalClose} className="modal-button">
-              OK
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

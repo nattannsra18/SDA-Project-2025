@@ -183,3 +183,38 @@
   .modal-button:hover {
     background-color: #2b80b9;
   }
+
+/* Custom SweetAlert2 Styles */
+.custom-swal-popup {
+  background-color: #18181C !important;
+  border-radius: 10px;
+  border: 1px solid #3D9BDC;
+}
+
+.custom-swal-title {
+  color: #3D9BDC !important;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.custom-swal-content {
+  color: #ffffff !important;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.custom-swal-confirm-button {
+  background-color: #3D9BDC !important;
+  font-family: 'Montserrat', sans-serif;
+  border-radius: 5px;
+}
+
+.swal2-icon.swal2-success {
+  border-color: #3D9BDC !important;
+}
+
+.swal2-icon.swal2-success [class^='swal2-success-circular-line'] {
+  background-color: #18181C !important;
+}
+
+.swal2-icon.swal2-error {
+  border-color: #D70000 !important;
+}

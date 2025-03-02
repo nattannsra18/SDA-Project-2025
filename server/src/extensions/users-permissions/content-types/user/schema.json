@@ -9,7 +9,7 @@
     "displayName": "User"
   },
   "options": {
-    "timestamps": true
+    "draftAndPublish": false
   },
   "attributes": {
     "username": {
@@ -65,17 +65,14 @@
       "inversedBy": "users",
       "configurable": false
     },
-    "cart": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::cart.cart",
-      "mappedBy": "users_permissions_user"
-    },
     "product_key": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::product-key.product-key",
       "mappedBy": "users_permissions_user"
+    },
+    "phone_number": {
+      "type": "biginteger"
     }
   }
 }

@@ -11,7 +11,7 @@
     "draftAndPublish": true
   },
   "attributes": {
-    "totalAmount": {
+    "totalQuantity": {
       "type": "integer"
     },
     "totalPrice": {
@@ -23,11 +23,10 @@
       "target": "api::product.product",
       "inversedBy": "carts"
     },
-    "users_permissions_user": {
+    "cart_owner": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "plugin::users-permissions.user",
-      "inversedBy": "cart"
+      "target": "plugin::users-permissions.user"
     }
   }
 }
