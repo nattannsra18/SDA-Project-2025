@@ -13,37 +13,47 @@ const Navbar = () => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ดึงค่า search จาก URL เมื่อ component โหลด
+  // รวมฟังก์ชันการดึงค่าจาก URL และการล้างค่าเมื่อไปหน้าอื่น
   useEffect(() => {
-    if (location.pathname === "/store" && location.search) {
-      const params = new URLSearchParams(location.search);
-      const query = params.get("search");
-      if (query) {
-        setSearchTerm(query);
+    if (location.pathname === "/store") {
+      if (location.search) {
+        // ถ้าอยู่ที่หน้า Store และมีพารามิเตอร์ค้นหา
+        const params = new URLSearchParams(location.search);
+        const query = params.get("search");
+        if (query) {
+          setSearchTerm(query);
+        }
+      } else {
+        // ถ้าอยู่ที่หน้า Store แต่ไม่มีพารามิเตอร์ค้นหา
+        setSearchTerm("");
       }
+    } else {
+      // ถ้าไม่ได้อยู่ที่หน้า Store
+      setSearchTerm("");
     }
-  }, [location]);
+  }, [location.pathname, location.search]);
 
   // ✅ ให้โลโก้คลิกแล้วนำทางไปหน้า Home
   const handleLogoClick = () => {
     navigate("/home");
   };
 
-  // แก้ไขฟังก์ชัน handleSearchChange
+  // ✅ จัดการการค้นหา - เด้งไปหน้า Store ทันทีที่เริ่มพิมพ์
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-
+    
     // ตรวจสอบว่ามีตัวอักษรหรือไม่ (ไม่นับช่องว่าง)
     if (value.trim()) {
       // แต่ส่งค่าที่มี space ไปด้วย (ไม่ใช้ trim ตรงนี้)
       navigate(`/store?search=${encodeURIComponent(value)}`);
     } else if (location.pathname === "/store") {
+      // ถ้าลบคำค้นหาจนหมดและอยู่ที่หน้า Store ให้รีเฟรชหน้า Store โดยไม่มีพารามิเตอร์ค้นหา
       navigate("/store");
     }
   };
 
-  // แก้ไขฟังก์ชัน handleSearchSubmit
+  // ✅ เมื่อกด Enter ในช่องค้นหา
   const handleSearchSubmit = (e) => {
     if (e.key === "Enter" && searchTerm.trim()) {
       e.preventDefault();
@@ -52,7 +62,7 @@ const Navbar = () => {
     }
   };
 
-  // แก้ไขฟังก์ชัน handleSearchIconClick
+  // ✅ เมื่อคลิกที่ไอคอนค้นหา
   const handleSearchIconClick = () => {
     if (searchTerm.trim()) {
       // ส่งค่าที่มี space ไปด้วย
@@ -63,17 +73,17 @@ const Navbar = () => {
   // ✅ ตรวจสอบการเข้าสู่ระบบและแสดงข้อมูลผู้ใช้
   const handleUserIconClick = async () => {
     const token = sessionStorage.getItem("token");
-
+    
     if (!token) {
       navigate("/login");
       return;
     }
-
+    
     if (userData) {
       setShowModal(true);
       return;
     }
-
+    
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:1337/api/users/me", {
@@ -127,17 +137,17 @@ const Navbar = () => {
         </div>
         <div className="wrapper2">
           <div className="search-box">
-            <input
-              type="text"
-              placeholder="Search Game"
-              className="search-input"
+            <input 
+              type="text" 
+              placeholder="Search Game" 
+              className="search-input" 
               value={searchTerm}
               onChange={handleSearchChange}
               onKeyPress={handleSearchSubmit}
             />
-            <FaSearch
-              className="search-icon"
-              style={{ cursor: "pointer" }}
+            <FaSearch 
+              className="search-icon" 
+              style={{ cursor: "pointer" }} 
               onClick={handleSearchIconClick}
             />
           </div>
@@ -171,8 +181,8 @@ const Navbar = () => {
           <div className="user-modal-content">
             <div className="user-modal-header">
               <h2>User Profile</h2>
-              <button
-                className="close-button"
+              <button 
+                className="close-button" 
                 onClick={handleCloseModal}
               >
                 <FaTimes />
@@ -193,8 +203,8 @@ const Navbar = () => {
               </div>
             </div>
             <div className="user-modal-footer">
-              <button
-                className="logout-button"
+              <button 
+                className="logout-button" 
                 onClick={handleLogout}
               >
                 <FaSignOutAlt /> Logout
