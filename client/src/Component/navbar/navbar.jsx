@@ -11,10 +11,51 @@ const Navbar = () => {
   const [showModal, setShowModal] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // ดึงค่า search จาก URL เมื่อ component โหลด
+  useEffect(() => {
+    if (location.pathname === "/store" && location.search) {
+      const params = new URLSearchParams(location.search);
+      const query = params.get("search");
+      if (query) {
+        setSearchTerm(query);
+      }
+    }
+  }, [location]);
 
   // ✅ ให้โลโก้คลิกแล้วนำทางไปหน้า Home
   const handleLogoClick = () => {
     navigate("/home");
+  };
+
+  // ✅ จัดการการค้นหา - เด้งไปหน้า Store ทันทีที่เริ่มพิมพ์
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    
+    // นำทางไปยังหน้า Store เมื่อมีการพิมพ์ (ถ้ามีตัวอักษรอย่างน้อย 1 ตัว)
+    if (value.trim()) {
+      navigate(`/store?search=${encodeURIComponent(value.trim())}`);
+    } else if (location.pathname === "/store") {
+      // ถ้าลบคำค้นหาจนหมดและอยู่ที่หน้า Store ให้รีเฟรชหน้า Store โดยไม่มีพารามิเตอร์ค้นหา
+      navigate("/store");
+    }
+  };
+
+  // ✅ เมื่อกด Enter ในช่องค้นหา
+  const handleSearchSubmit = (e) => {
+    if (e.key === "Enter" && searchTerm.trim()) {
+      e.preventDefault();
+      navigate(`/store?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
+  };
+
+  // ✅ เมื่อคลิกที่ไอคอนค้นหา
+  const handleSearchIconClick = () => {
+    if (searchTerm.trim()) {
+      navigate(`/store?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
   };
 
   // ✅ ตรวจสอบการเข้าสู่ระบบและแสดงข้อมูลผู้ใช้
@@ -85,8 +126,19 @@ const Navbar = () => {
         </div>
         <div className="wrapper2">
           <div className="search-box">
-            <input type="text" placeholder="Search Game" className="search-input" />
-            <FaSearch className="search-icon" />
+            <input 
+              type="text" 
+              placeholder="Search Game" 
+              className="search-input" 
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onKeyPress={handleSearchSubmit}
+            />
+            <FaSearch 
+              className="search-icon" 
+              style={{ cursor: "pointer" }} 
+              onClick={handleSearchIconClick}
+            />
           </div>
         </div>
         <div className="wrapper3">

@@ -1,100 +1,182 @@
 /* All_Product.css */
 .all-product-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #000;
-    color: white;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #000;
+  color: white;
+}
+
+.all-product-title {
+  font-size: 24px;
+  margin-bottom: 40px;
+  font-weight: bold;
+  position: relative;
+}
+
+/* Highlight effect for search results title */
+.all-product-title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -10px;
+  width: 100px;
+  height: 3px;
+  background-color: #3D9BDC;
+  transition: width 0.3s ease;
+}
+
+.all-product-title:hover::after {
+  width: 150px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.product-card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #000;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  background-color: #111;
+}
+
+.product-image {
+  position: relative;
+  height: 0;
+  padding-bottom: 100%; /* สร้าง aspect ratio 1:1 */
+  overflow: hidden;
+}
+
+.product-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-image img {
+  transform: scale(1.05);
+}
+
+.add-to-cart-btn {
+  position: absolute;
+  margin-bottom: 50px;
+  bottom: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: white;
+  color: black;
+  border: none;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.add-to-cart-btn:hover {
+  background-color: #3D9BDC;
+  color: white;
+  transform: scale(1.1);
+}
+
+.product-info {
+  padding: 12px 8px;
+}
+
+.product-info h3 {
+  font-size: 16px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #3D9BDC;
+}
+
+/* สไตล์สำหรับแสดงผลเมื่อไม่พบสินค้า */
+.no-results {
+  text-align: center;
+  padding: 50px 20px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-top: 20px;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.no-results p {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #ccc;
+}
+
+.no-results button {
+  background-color: #0078F2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.no-results button:hover {
+  background-color: #005AC1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 120, 242, 0.3);
+}
+
+/* รองรับหน้าจอขนาดเล็ก */
+@media (max-width: 1024px) {
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .all-product-title {
-    font-size: 24px;
-    margin-bottom: 40px;
-    font-weight: bold;
-  }
-  
-  .products-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-  }
-  
-  .product-card {
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    background-color: #000;
-    transition: transform 0.2s;
-  }
-  
-  .product-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .product-image {
-    position: relative;
-    height: 0;
-    padding-bottom: 100%; /* สร้าง aspect ratio 1:1 */
-    overflow: hidden;
-  }
-  
-  .product-image img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .add-to-cart-btn {
-    position: absolute;
-    margin-bottom: 50px;
-    bottom: 10px;
-    right: 10px;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: white;
-    color: black;
-    border: none;
     font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr;
   }
   
-  .product-info {
-    padding: 12px 8px;
-  }
-  
-  .product-info h3 {
+  .no-results p {
     font-size: 16px;
-    margin-bottom: 8px;
   }
-  
-  .product-price {
-    font-size: 16px;
-    font-weight: bold;
-  }
-  
-  /* รองรับหน้าจอขนาดเล็ก */
-  @media (max-width: 1024px) {
-    .products-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .products-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .products-grid {
-      grid-template-columns: 1fr;
-    }
-  }
+}

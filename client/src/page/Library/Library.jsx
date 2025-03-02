@@ -7,6 +7,7 @@ import {
  BiGridAlt, 
  BiListUl 
 } from 'react-icons/bi';
+import { FaCopy, FaKey } from 'react-icons/fa';
 import './Library.css';
 
 const Library = () => {
@@ -16,16 +17,23 @@ const Library = () => {
  const [sortBy, setSortBy] = useState('name');
  const [viewMode, setViewMode] = useState('grid');
 
+ // Modern modal style with no borders and white text
  const customSwal = Swal.mixin({
    customClass: {
-     popup: 'custom-swal-popup',
-     title: 'custom-swal-title',
-     htmlContainer: 'custom-swal-content',
-     confirmButton: 'custom-swal-confirm-button',
-     cancelButton: 'custom-swal-cancel-button',
-     icon: 'custom-swal-icon'
+     popup: 'modern-swal-popup',
+     title: 'modern-swal-title',
+     htmlContainer: 'modern-swal-content',
+     confirmButton: 'modern-swal-confirm-button',
+     closeButton: 'modern-swal-close-button',
+     icon: 'modern-swal-icon'
    },
-   buttonsStyling: false
+   buttonsStyling: false,
+   showClass: {
+     popup: 'animate__animated animate__fadeIn faster'
+   },
+   hideClass: {
+     popup: 'animate__animated animate__fadeOut faster'
+   }
  });
 
  useEffect(() => {
@@ -102,31 +110,56 @@ const Library = () => {
      }
    });
 
-   const handleGameKeyModal = (game) => {
-    customSwal.fire({
-      title: game.name.toUpperCase(),
-      html: `
-        <div class="game-key-modal">
-          <p class="key-instructions">Click below to copy your game key</p>
-          <div class="game-key-container">${game.gameKey}</div>
+   // Updated game key modal based on provided design
+ const handleGameKeyModal = (game) => {
+  customSwal.fire({
+    title: game.name.toUpperCase(),
+    html: `
+      <div class="game-key-modal">
+        <div class="key-label">YOUR GAME ACTIVATION KEY</div>
+        <div class="game-key-container" onclick="navigator.clipboard.writeText('${game.gameKey}')">
+          ${game.gameKey}
         </div>
-      `,
-      showConfirmButton: true,
-      confirmButtonText: 'Copy Key',
-      showCloseButton: true,
-      animation: true,
-      preConfirm: () => {
-        navigator.clipboard.writeText(game.gameKey);
-        customSwal.fire({
-          icon: 'success',
-          title: 'Key Copied',
-          text: 'Your game key has been copied to clipboard',
-          showConfirmButton: false,
-          timer: 1500
-        });
-      }
-    });
-  };
+        <div class="activate-info">
+          <p>Activate this key on the game platform to start playing</p>
+        </div>
+      </div>
+    `,
+    showConfirmButton: true,
+    confirmButtonText: 'COPY KEY',
+    showCloseButton: true,
+    showClass: {
+      popup: 'animate__animated animate__fadeIn'
+    },
+    hideClass: {
+      popup: 'animate__animated animate__fadeOut'
+    },
+    preConfirm: () => {
+      navigator.clipboard.writeText(game.gameKey);
+      const toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        iconColor: 'white',
+        customClass: {
+          popup: 'colored-toast',
+          title: 'toast-title'
+        },
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+      });
+
+      toast.fire({
+        icon: 'success',
+        title: 'Game key copied to clipboard!'
+      });
+    }
+  });
+};
 
  if (loading) {
    return <div className="loading">Loading your library...</div>;
