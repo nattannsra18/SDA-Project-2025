@@ -73,8 +73,8 @@ const Login = () => {
         confirmButtonColor: '#3D9BDC'
       });
   
-      // Navigate to store page
-      navigate("/store");
+      // Navigate to home page
+      navigate("/home");
     } catch (error) {
       console.error("Login Error:", error);
       

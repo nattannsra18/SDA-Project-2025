@@ -184,13 +184,6 @@ const Cart = () => {
   };
 
 
-  const handleMoveToWishlist = (productId) => {
-    customSwal.fire({
-      icon: 'info',
-      title: 'Coming Soon',
-      text: 'The wishlist feature will be added to your arsenal soon!'
-    });
-  };
 
   const formatNumber = (number) => {
     return number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -258,7 +251,6 @@ const Cart = () => {
 
                   <div className="cart-item-actions">
                     <button className="remove-btn" onClick={() => handleRemoveFromCart(item.id)}>Remove</button>
-                    <button className="wishlist-btn" onClick={() => handleMoveToWishlist(item.id)}>Move to wishlist</button>
                   </div>
                 </div>
               ))

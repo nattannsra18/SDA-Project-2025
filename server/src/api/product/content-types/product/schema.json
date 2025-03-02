@@ -48,6 +48,12 @@
       "relation": "manyToMany",
       "target": "api::genre.genre",
       "mappedBy": "products"
+    },
+    "product_keys": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-key.product-key",
+      "mappedBy": "product"
     }
   }
 }
