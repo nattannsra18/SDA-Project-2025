@@ -99,7 +99,7 @@ const Cart = () => {
 
   const handleRemoveFromCart = async (productId) => {
     customSwal.fire({
-      title: 'Remove from Vault?',
+      title: 'Remove from Cart?',
       text: 'Are you sure you want to remove this title from your card?',
       icon: 'question',
       showCancelButton: true,
@@ -133,7 +133,7 @@ const Cart = () => {
           if (!userCart) {
             customSwal.fire({
               icon: 'error',
-              title: 'Vault Not Found',
+              title: 'Cart Not Found',
               text: 'Your card seems to be missing.'
             });
             return;
@@ -169,7 +169,7 @@ const Cart = () => {
           customSwal.fire({
             icon: 'success',
             title: 'Title Removed',
-            text: 'The game has been removed from your vault.'
+            text: 'The game has been removed from your cart.'
           });
         } catch (error) {
           console.error('Error removing item from cart:', error);
@@ -203,12 +203,12 @@ const Cart = () => {
   return (
     <div className="cart-page">
       <div className="cart-container">
-        <h1>Your card</h1>
+        <h1>Your Card</h1>
         <div className="cart-content">
           <div className="cart-items">
             {cartItems.length === 0 ? (
               <div className="empty-cart">
-                <p>Your vault awaits epic adventures</p>
+                <p>Your cart awaits epic adventures</p>
               </div>
             ) : (
               cartItems.map((item) => (

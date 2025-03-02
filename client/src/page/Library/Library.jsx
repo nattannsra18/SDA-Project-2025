@@ -168,7 +168,7 @@ const Library = () => {
  return (
    <div className="library-page">
      <div className="library-header">
-       <h1>My Games Library</h1>
+       <h1>Library</h1>
      </div>
 
      <div className="library-controls">
