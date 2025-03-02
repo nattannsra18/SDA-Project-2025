@@ -29,49 +29,51 @@ const Navbar = () => {
     navigate("/home");
   };
 
-  // ✅ จัดการการค้นหา - เด้งไปหน้า Store ทันทีที่เริ่มพิมพ์
+  // แก้ไขฟังก์ชัน handleSearchChange
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
-    // นำทางไปยังหน้า Store เมื่อมีการพิมพ์ (ถ้ามีตัวอักษรอย่างน้อย 1 ตัว)
+
+    // ตรวจสอบว่ามีตัวอักษรหรือไม่ (ไม่นับช่องว่าง)
     if (value.trim()) {
-      navigate(`/store?search=${encodeURIComponent(value.trim())}`);
+      // แต่ส่งค่าที่มี space ไปด้วย (ไม่ใช้ trim ตรงนี้)
+      navigate(`/store?search=${encodeURIComponent(value)}`);
     } else if (location.pathname === "/store") {
-      // ถ้าลบคำค้นหาจนหมดและอยู่ที่หน้า Store ให้รีเฟรชหน้า Store โดยไม่มีพารามิเตอร์ค้นหา
       navigate("/store");
     }
   };
 
-  // ✅ เมื่อกด Enter ในช่องค้นหา
+  // แก้ไขฟังก์ชัน handleSearchSubmit
   const handleSearchSubmit = (e) => {
     if (e.key === "Enter" && searchTerm.trim()) {
       e.preventDefault();
-      navigate(`/store?search=${encodeURIComponent(searchTerm.trim())}`);
+      // ส่งค่าที่มี space ไปด้วย
+      navigate(`/store?search=${encodeURIComponent(searchTerm)}`);
     }
   };
 
-  // ✅ เมื่อคลิกที่ไอคอนค้นหา
+  // แก้ไขฟังก์ชัน handleSearchIconClick
   const handleSearchIconClick = () => {
     if (searchTerm.trim()) {
-      navigate(`/store?search=${encodeURIComponent(searchTerm.trim())}`);
+      // ส่งค่าที่มี space ไปด้วย
+      navigate(`/store?search=${encodeURIComponent(searchTerm)}`);
     }
   };
 
   // ✅ ตรวจสอบการเข้าสู่ระบบและแสดงข้อมูลผู้ใช้
   const handleUserIconClick = async () => {
     const token = sessionStorage.getItem("token");
-    
+
     if (!token) {
       navigate("/login");
       return;
     }
-    
+
     if (userData) {
       setShowModal(true);
       return;
     }
-    
+
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:1337/api/users/me", {
@@ -125,17 +127,17 @@ const Navbar = () => {
         </div>
         <div className="wrapper2">
           <div className="search-box">
-            <input 
-              type="text" 
-              placeholder="Search Game" 
-              className="search-input" 
+            <input
+              type="text"
+              placeholder="Search Game"
+              className="search-input"
               value={searchTerm}
               onChange={handleSearchChange}
               onKeyPress={handleSearchSubmit}
             />
-            <FaSearch 
-              className="search-icon" 
-              style={{ cursor: "pointer" }} 
+            <FaSearch
+              className="search-icon"
+              style={{ cursor: "pointer" }}
               onClick={handleSearchIconClick}
             />
           </div>
@@ -169,8 +171,8 @@ const Navbar = () => {
           <div className="user-modal-content">
             <div className="user-modal-header">
               <h2>User Profile</h2>
-              <button 
-                className="close-button" 
+              <button
+                className="close-button"
                 onClick={handleCloseModal}
               >
                 <FaTimes />
@@ -191,8 +193,8 @@ const Navbar = () => {
               </div>
             </div>
             <div className="user-modal-footer">
-              <button 
-                className="logout-button" 
+              <button
+                className="logout-button"
                 onClick={handleLogout}
               >
                 <FaSignOutAlt /> Logout
