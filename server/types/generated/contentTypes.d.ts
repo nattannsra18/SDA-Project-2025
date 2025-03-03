@@ -427,6 +427,50 @@ export interface ApiGenreGenre extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
+  collectionName: 'orders';
+  info: {
+    description: '';
+    displayName: 'Order';
+    pluralName: 'orders';
+    singularName: 'order';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
+      Schema.Attribute.Private;
+    order_number: Schema.Attribute.String;
+    order_status: Schema.Attribute.Enumeration<
+      ['pending', 'processing', 'completed', 'cancelled']
+    >;
+    payment_method: Schema.Attribute.String;
+    payment_status: Schema.Attribute.Enumeration<['pending', 'paid', 'failed']>;
+    product_keys: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::product-key.product-key'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    purchased_at: Schema.Attribute.DateTime;
+    slip_image: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios'
+    >;
+    total_price: Schema.Attribute.Decimal;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    user: Schema.Attribute.Relation<
+      'oneToOne',
+      'plugin::users-permissions.user'
+    >;
+  };
+}
+
 export interface ApiProductKeyProductKey extends Struct.CollectionTypeSchema {
   collectionName: 'product_keys';
   info: {
@@ -442,7 +486,9 @@ export interface ApiProductKeyProductKey extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    is_used: Schema.Attribute.Boolean;
     key: Schema.Attribute.String;
+    key_status: Schema.Attribute.Enumeration<['available', 'reserved', 'sold']>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -455,6 +501,7 @@ export interface ApiProductKeyProductKey extends Struct.CollectionTypeSchema {
     >;
     product: Schema.Attribute.Relation<'manyToOne', 'api::product.product'>;
     publishedAt: Schema.Attribute.DateTime;
+    sold_at: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -980,6 +1027,7 @@ export interface PluginUsersPermissionsUser
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
+    order: Schema.Attribute.Relation<'oneToOne', 'api::order.order'>;
     password: Schema.Attribute.Password &
       Schema.Attribute.Private &
       Schema.Attribute.SetMinMaxLength<{
@@ -1021,6 +1069,7 @@ declare module '@strapi/strapi' {
       'admin::user': AdminUser;
       'api::cart.cart': ApiCartCart;
       'api::genre.genre': ApiGenreGenre;
+      'api::order.order': ApiOrderOrder;
       'api::product-key.product-key': ApiProductKeyProductKey;
       'api::product.product': ApiProductProduct;
       'plugin::content-releases.release': PluginContentReleasesRelease;

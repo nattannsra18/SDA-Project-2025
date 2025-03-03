@@ -25,6 +25,20 @@
       "relation": "manyToOne",
       "target": "api::product.product",
       "inversedBy": "product_keys"
+    },
+    "key_status": {
+      "type": "enumeration",
+      "enum": [
+        "available",
+        "reserved",
+        "sold"
+      ]
+    },
+    "sold_at": {
+      "type": "datetime"
+    },
+    "is_used": {
+      "type": "boolean"
     }
   }
 }
