@@ -111,7 +111,6 @@ const All_Product = () => {
         // Debug: ตรวจสอบข้อมูลตะกร้าที่ได้รับ
         console.log("User cart:", userCart);
         
-        // ใช้ documentId ในการอ้างอิงเอกสาร (Strapi 5)
         const cartDocumentId = userCart.documentId;
         
         if (!cartDocumentId) {
@@ -120,21 +119,43 @@ const All_Product = () => {
         }
         
         // ตรวจสอบโครงสร้างข้อมูลสินค้าในตะกร้า
-        const cartProducts = userCart.products?.data || [];
+        const cartProducts = userCart.attributes?.products?.data || [];
         console.log("Cart products:", cartProducts);
         
-        // ตรวจสอบว่าเกมนี้มีในตะกร้าอยู่แล้วหรือไม่
-        const existingProduct = cartProducts.some(p => p.documentId === product.documentId);
-  
+        // ตรวจสอบและแสดงข้อมูล ID ของสินค้าเพื่อการทดสอบ
+        console.log("Checking for product with ID:", product.id);
+        console.log("Product documentId:", product.documentId);
+        cartProducts.forEach(p => {
+          console.log("Cart product ID:", p.id, "Cart product documentId:", p.documentId);
+        });
+        
+        // ตรวจสอบว่าเกมนี้มีในตะกร้าอยู่แล้วหรือไม่โดยเช็คทั้ง id และ documentId
+        const existingProduct = cartProducts.some(p => 
+          (p.id && p.id === product.id) || 
+          (p.documentId && p.documentId === product.documentId) ||
+          (p.attributes && p.attributes.id === product.id) ||
+          (p.attributes && p.attributes.documentId === product.documentId)
+        );
+
         if (existingProduct) {
+          // ปิด loading dialog
+          Swal.close();
+          
+          // แสดงข้อความแจ้งเตือนว่ามีเกมในตะกร้าแล้ว
           Swal.fire({
             title: 'Game Already in Cart',
-            text: 'This game is already in your cart',
+            text: `${product.name} is already in your cart`,
             icon: 'info',
-            confirmButtonText: 'OK',
+            confirmButtonText: 'View Cart',
             confirmButtonColor: '#0078F2',
+            showCancelButton: true,
+            cancelButtonText: 'Continue Shopping',
             background: '#1a1a1a',
             color: '#ffffff'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              navigate('/cart');
+            }
           });
           return;
         }

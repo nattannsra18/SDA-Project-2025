@@ -9,8 +9,8 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [totalQuantity, setTotalQuantity] = useState(0);
 
-  // สร้างฟังก์ชันสำหรับกำหนดค่า SweetAlert ให้มีธีมเดียวกันทั้งหมด
   const customSwal = Swal.mixin({
     customClass: {
       popup: 'custom-swal-popup',
@@ -47,8 +47,6 @@ const Cart = () => {
             },
           }
         );
-
-        console.log('Full Cart Response:', JSON.stringify(response.data, null, 2));
 
         const userCart = response.data.data[0];
 
@@ -88,13 +86,68 @@ const Cart = () => {
       }
     };
 
-
     fetchCartItems();
   }, []);
 
   const calculateTotal = (items) => {
-    const total = items.reduce((sum, item) => sum + (item.price || 0), 0);
-    setTotalPrice(total);
+    let price = 0;
+    let quantity = 0;
+
+    items.forEach(item => {
+      price += (item.price || 0);
+      quantity++;
+    });
+
+    setTotalPrice(price);
+    setTotalQuantity(quantity);
+    updateCartInStrapi(price, quantity);
+  };
+
+  const updateCartInStrapi = async (totalPrice, totalQuantity) => {
+    try {
+      const userId = sessionStorage.getItem("userId");
+      const token = sessionStorage.getItem("token");
+
+      if (!userId || !token) {
+        console.error('User not authenticated.');
+        return;
+      }
+
+      const cartResponse = await axios.get(
+        `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const userCart = cartResponse.data.data[0];
+
+      if (!userCart) {
+        console.error('Cart not found for user:', userId);
+        return;
+      }
+
+      const cartDocumentId = userCart.documentId; // ใช้ documentId ที่นี่
+
+      await axios.put(
+        `http://localhost:1337/api/carts/${cartDocumentId}`,
+        {
+          data: {
+            totalPrice: totalPrice.toString(),
+            totalQuantity: totalQuantity,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Error updating cart in Strapi:', error);
+    }
   };
 
   const handleRemoveFromCart = async (productId) => {
@@ -139,8 +192,7 @@ const Cart = () => {
             return;
           }
 
-          const cartDocumentId = userCart.documentId;
-
+          const cartDocumentId = userCart.documentId; // ใช้ documentId ที่นี่
 
           const updatedProducts = userCart.products
             .filter(product => product.id !== productId)
@@ -168,7 +220,7 @@ const Cart = () => {
 
           customSwal.fire({
             icon: 'success',
-            title: 'Title Removed',
+            title: 'Removed',
             text: 'The game has been removed from your cart.'
           });
         } catch (error) {
@@ -182,8 +234,6 @@ const Cart = () => {
       }
     });
   };
-
-
 
   const formatNumber = (number) => {
     return number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -265,6 +315,10 @@ const Cart = () => {
             <div className="summary-row">
               <span>Taxes</span>
               <span>Calculated at Checkout</span>
+            </div>
+            <div className="summary-row total">
+              <span>Total Quantity</span>
+              <span>{totalQuantity}</span>
             </div>
             <div className="summary-row total">
               <span>Total Cost</span>

@@ -1,4 +1,3 @@
-/* All_Product.css */
 .all-product-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -96,6 +95,17 @@
   background-color: #3D9BDC;
   color: white;
   transform: scale(1.1);
+}
+
+.already-in-cart {
+  background-color: #4CAF50; /* สีเขียว */
+  color: white;
+  cursor: pointer;
+}
+
+.already-in-cart:hover {
+  background-color: #3e8e41; /* สีเขียวเข้มขึ้น */
+  transform: scale(1.1); /* เพิ่มเอฟเฟกต์เมื่อโฮเวอร์ */
 }
 
 .product-info {

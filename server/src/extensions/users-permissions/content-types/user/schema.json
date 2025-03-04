@@ -85,6 +85,12 @@
       "relation": "oneToMany",
       "target": "api::product-key.product-key",
       "mappedBy": "owner"
+    },
+    "wallet": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::wallet.wallet",
+      "mappedBy": "user"
     }
   }
 }
