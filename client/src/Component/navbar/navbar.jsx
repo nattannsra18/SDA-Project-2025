@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./navbar.css";
+import TopUp from "../TopUp/TopUp";
 import { GiLockedChest } from "react-icons/gi";
 import { FaSearch, FaUserCircle, FaTimes, FaSignOutAlt, FaWallet, FaUserAlt } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -9,6 +10,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [userData, setUserData] = useState(null);
   const [walletBalance, setWalletBalance] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -45,6 +47,22 @@ const Navbar = () => {
     fetchWalletData();
   }, []);
 
+  // ดึงค่าจาก URL และเคลียร์เมื่อเปลี่ยนหน้า
+  useEffect(() => {
+    if (location.pathname === "/store") {
+      if (location.search) {
+        const params = new URLSearchParams(location.search);
+        const query = params.get("search");
+        if (query) {
+          setSearchTerm(query);
+        }
+      } else {
+        setSearchTerm("");
+      }
+    } else {
+      setSearchTerm("");
+    }
+  }, [location.pathname, location.search]);
 
   const handleLogoClick = () => {
     navigate("/home");
@@ -54,7 +72,7 @@ const Navbar = () => {
     const value = e.target.value;
     setSearchTerm(value);
 
-    if (value.trim()) {
+    if (value.trim().length > 0) {
       navigate(`/store?search=${encodeURIComponent(value)}`);
     } else if (location.pathname === "/store") {
       navigate("/store");
@@ -82,8 +100,6 @@ const Navbar = () => {
       navigate("/login");
       return;
     }
-
-
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:1337/api/users/me", {
@@ -111,10 +127,8 @@ const Navbar = () => {
   };
 
   const handleTopUp = () => {
-    // ฟังก์ชันสำหรับการเติมเงิน
-    // สามารถเพิ่มโลจิกการเติมเงินหรือนำทางไปยังหน้าเติมเงินได้ที่นี่
     setShowModal(false);
-    navigate("/top-up"); // สมมติว่ามีหน้าเติมเงิน
+    setShowTopUpModal(true);
   };
 
   return (
@@ -256,6 +270,13 @@ const Navbar = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {showTopUpModal && (
+        <TopUp 
+          isOpen={showTopUpModal} 
+          onClose={() => setShowTopUpModal(false)} 
+        />
       )}
 
       {loading && (
