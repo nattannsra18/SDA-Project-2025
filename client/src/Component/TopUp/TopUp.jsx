@@ -1,42 +1,105 @@
 import React, { useState, useEffect } from "react";
 import "./TopUp.css";
-import { FaTimes, FaWallet, FaFileUpload } from "react-icons/fa";
+import { FaTimes, FaWallet, FaFileUpload, FaCheckCircle } from "react-icons/fa";
 import { QRCodeCanvas } from "qrcode.react";
 import generatePayload from "promptpay-qr";
 import Swal from "sweetalert2";
-
-const promptPayId = "0650389146"; // Your PromptPay ID
+import axios from "axios";
 
 const TopUp = () => {
     const [isTopUpAmountModalOpen, setIsTopUpAmountModalOpen] = useState(true);
     const [isUploadSlipModalOpen, setIsUploadSlipModalOpen] = useState(false);
+    const [isProcessingModalOpen, setIsProcessingModalOpen] = useState(false);
     const [topUpAmount, setTopUpAmount] = useState(null);
     const [paymentMethod, setPaymentMethod] = useState("");
     const [qrCode, setQrCode] = useState("");
     const [error, setError] = useState("");
     const [slipImage, setSlipImage] = useState(null);
     const [userId, setUserId] = useState(null);
-    const [walletDocumentId, setWalletDocumentId] = useState(null);
+    const [walletData, setWalletData] = useState(null);
+    const [promptPayId, setPromptPayId] = useState(null);
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
         const userId = sessionStorage.getItem("userId");
+        
+        // Fetch PromptPay ID
+        const fetchPromptPayId = async () => {
+            try {
+                const response = await axios.get('http://localhost:1337/api/promptpays', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (response.data.data.length > 0) {
+                    setPromptPayId(response.data.data[0].number);
+                }
+            } catch (error) {
+                console.error("Error fetching PromptPay ID:", error);
+                setError("Failed to fetch PromptPay ID");
+            }
+        };
+
         if (userId) {
             setUserId(userId);
+            fetchWalletData(userId, token);
+            fetchPromptPayId();
         }
     }, []);
 
     useEffect(() => {
-        if (userId) {
-            fetchWalletDocumentId();
-        }
-    }, [userId]);
-
-    useEffect(() => {
-        if (topUpAmount && paymentMethod === "promptPay") {
+        if (topUpAmount && paymentMethod === "promptPay" && promptPayId) {
             generatePromptPayQR(parseFloat(topUpAmount));
         }
-    }, [topUpAmount, paymentMethod]);
+    }, [topUpAmount, paymentMethod, promptPayId]);
+
+    const fetchWalletData = async (userId, token) => {
+        try {
+            const response = await axios.get(
+                `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            if (response.data.data.length > 0) {
+                setWalletData(response.data.data[0]);
+            } else {
+                await createNewWallet(userId, token);
+            }
+        } catch (error) {
+            console.error("Error fetching wallet data:", error);
+            setError("Failed to fetch wallet data. Please try again.");
+        }
+    };
+
+    const createNewWallet = async (userId, token) => {
+        try {
+            const response = await axios.post(
+                'http://localhost:1337/api/wallets', 
+                {
+                    data: {
+                        user: userId,
+                        balance: 0,
+                        wallet_status: true,
+                        transaction_history: []
+                    }
+                },
+                {
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}` 
+                    }
+                }
+            );
+
+            if (response.data.data) {
+                setWalletData(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error creating wallet:", error);
+            setError("Unable to create wallet. Please try again.");
+        }
+    };
 
     const topUpOptions = [
         { amount: 100, label: "฿100" },
@@ -47,7 +110,7 @@ const TopUp = () => {
     ];
 
     const handleTopUpSelect = (amount) => {
-        setTopUpAmount(amount);
+        setTopUpAmount(String(amount));
         setError("");
     };
 
@@ -87,89 +150,99 @@ const TopUp = () => {
 
     const handleSlipUpload = async () => {
         if (!slipImage) {
-            alert("Please select a slip image");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Oops...',
+                text: 'Please select a payment slip image',
+                background: '#1e1e2a',
+                color: '#ffffff'
+            });
             return;
         }
     
-        if (!walletDocumentId) {
-            await fetchWalletDocumentId();
-            if (!walletDocumentId) {
-                setError("Wallet document ID not found. Please try again.");
-                return;
-            }
+        if (!walletData) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Wallet information not found',
+                background: '#1e1e2a',
+                color: '#ffffff'
+            });
+            return;
         }
     
         const formData = new FormData();
         formData.append("files", slipImage);
     
         try {
-            const response = await fetch(`http://localhost:1337/api/upload`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-                },
-                body: formData,
-            });
-    
-            if (response.ok) {
-                const uploadedFile = await response.json();
-                await fetch(`http://localhost:1337/api/wallets/${walletDocumentId}`, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-                    },
-                    body: JSON.stringify({ data: { slip_image: uploadedFile[0].id } }),
-                });
-    
-                // Show success notification and reload page
-                Swal.fire({
-                    icon: "success",
-                    title: "Slip Uploaded!",
-                    text: "Your payment slip has been uploaded successfully. Please wait for verification.",
-                    showConfirmButton: false,
-                    timer: 2000,
-                    position: 'top-end',
-                    toast: true,
-                    didClose: () => {
-                        window.location.reload();
-                    }
-                });
-            } else {
-                setError("Slip upload failed");
-            }
-        } catch (error) {
-            console.error(error);
-            setError("Error uploading slip");
-        }
-    };
-    
-
-    const fetchWalletDocumentId = async () => {
-        if (!userId) return;
-        try {
-            const response = await fetch(
-                `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}&populate=slip_image`,
+            const token = sessionStorage.getItem("token");
+            
+            // Upload slip image
+            const uploadResponse = await axios.post(
+                `http://localhost:1337/api/upload`, 
+                formData,
                 {
-                    headers: {
-                        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-                    },
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
                 }
             );
-            if (response.ok) {
-                const data = await response.json();
-                if (data.data.length > 0) {
-                    const walletData = data.data[0];
-                    setWalletDocumentId(walletData.documentId);
-                } else {
-                    setError("Wallet information not found. Please ensure your wallet is set up.");
+    
+            // Calculate new balance
+            const newBalance = walletData.balance + parseFloat(topUpAmount);
+            
+            // Create current date and time
+            const currentDateTime = new Date();
+            
+            // Create transaction with detailed timestamp
+            const newTransaction = {
+                type: "top-up",
+                amount: parseFloat(topUpAmount),
+                status: "pending",
+                date: currentDateTime.toISOString().split('T')[0], // Date in YYYY-MM-DD format
+                time: currentDateTime.toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    hour12: true 
+                }), // Time in 12-hour format
+                timestamp: currentDateTime.toISOString() // Full ISO timestamp
+            };
+            
+            // Update wallet with new balance, slip image, and transaction history
+            const updateResponse = await axios.put(
+                `http://localhost:1337/api/wallets/${walletData.documentId}`, 
+                {
+                    data: { 
+                        slip_image: uploadResponse.data[0].id,
+                        balance: newBalance,
+                        wallet_status: false,
+                        transaction_history: [
+                            ...walletData.transaction_history,
+                            newTransaction
+                        ]
+                    } 
+                },
+                {
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    }
                 }
-            } else {
-                setError(`Failed to fetch wallet data: ${response.status} ${response.statusText}`);
-            }
+            );
+    
+            // Close upload slip modal and open processing modal
+            setIsUploadSlipModalOpen(false);
+            setIsProcessingModalOpen(true);
         } catch (error) {
-            console.error("Error fetching wallet data:", error);
-            setError("Failed to fetch wallet data. Please try again.");
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while uploading the slip',
+                background: '#1e1e2a',
+                color: '#ffffff'
+            });
         }
     };
 
@@ -193,6 +266,31 @@ const TopUp = () => {
         setIsTopUpAmountModalOpen(true);
     };
 
+    const RecentTransactions = ({ transactions }) => {
+        return (
+            <div className="recent-transactions">
+                {transactions.map((transaction, index) => (
+                    <div key={index} className="transaction-item">
+                        <div className="transaction-details">
+                            <span className="transaction-type">{transaction.type}</span>
+                            <span className="transaction-amount">
+                                {transaction.amount > 0 ? '+' : ''}฿{transaction.amount}
+                            </span>
+                        </div>
+                        <div className="transaction-meta">
+                            <span className="transaction-date">
+                                {transaction.date} {transaction.time}
+                            </span>
+                            <span className={`transaction-status ${transaction.status.toLowerCase()}`}>
+                                {transaction.status}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+    
     return (
         <>
             {isTopUpAmountModalOpen && (
@@ -213,9 +311,8 @@ const TopUp = () => {
                                     {topUpOptions.map((option) => (
                                         <button
                                             key={option.amount}
-                                            className={`top-up-quick-option ${topUpAmount === String(option.amount) ? "selected" : ""
-                                                }`}
-                                            onClick={() => handleTopUpSelect(String(option.amount))}
+                                            className={`top-up-quick-option ${topUpAmount === String(option.amount) ? "selected" : ""}`}
+                                            onClick={() => handleTopUpSelect(option.amount)}
                                         >
                                             {option.label}
                                         </button>
@@ -227,7 +324,7 @@ const TopUp = () => {
                                         type="text"
                                         id="customAmount"
                                         placeholder="Enter amount"
-                                        value={topUpAmount}
+                                        value={topUpAmount || ""}
                                         onChange={handleCustomAmountChange}
                                     />
                                 </div>
@@ -237,8 +334,7 @@ const TopUp = () => {
                                 <h3>Select Payment Method</h3>
                                 <div className="payment-method-options">
                                     <button
-                                        className={`payment-method-option ${paymentMethod === "promptPay" ? "selected" : ""
-                                            }`}
+                                        className={`payment-method-option ${paymentMethod === "promptPay" ? "selected" : ""}`}
                                         onClick={() => handlePaymentMethodSelect("promptPay")}
                                     >
                                         PromptPay
@@ -264,7 +360,7 @@ const TopUp = () => {
                             <button className="back-button" onClick={handleBackToAmountSelection}>
                                 Back
                             </button>
-                            <h2>Upload Payment Slip</h2>
+                            <h2>Payment Slip</h2>
                             <button className="close-button" onClick={() => setIsUploadSlipModalOpen(false)}>
                                 <FaTimes />
                             </button>
@@ -272,7 +368,15 @@ const TopUp = () => {
                         <div className="top-up-modal-body">
                             <div className="qr-code-container">
                                 {qrCode ? (
-                                    <QRCodeCanvas value={qrCode} size={256} level="H" />
+                                    <div className="qr-code-wrapper">
+                                        <QRCodeCanvas 
+                                            value={qrCode} 
+                                            size={256} 
+                                            level="H" 
+                                            bgColor="white"
+                                            fgColor="black"
+                                        />
+                                    </div>
                                 ) : (
                                     <div>Generating QR Code...</div>
                                 )}
@@ -294,12 +398,35 @@ const TopUp = () => {
                                 <label htmlFor="slipImage" className="upload-slip-button">
                                     <FaFileUpload /> Choose Slip Image
                                 </label>
-                                {slipImage && <p>Selected: {slipImage.name}</p>}
+                                {slipImage && <p className="selected-file-name">Selected: {slipImage.name}</p>}
                                 <button className="confirm-top-up-button" onClick={handleSlipUpload}>
                                     Upload Slip
                                 </button>
-                                {error && <div className="top-up-error">{error}</div>}
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isProcessingModalOpen && (
+                <div className="top-up-modal-overlay">
+                    <div className="top-up-modal-content processing-modal">
+                        <div className="top-up-modal-body">
+                            <div className="processing-icon">
+                                <FaCheckCircle size={80} color="#3D9BDC" />
+                            </div>
+                            <h2>Slip Upload Successful</h2>
+                            <p>Your payment slip has been uploaded and is pending verification.</p>
+                            <p>Our team will review your slip shortly.</p>
+                            <button 
+                                className="confirm-top-up-button" 
+                                onClick={() => {
+                                    setIsProcessingModalOpen(false);
+                                    window.location.reload();
+                                }}
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
                 </div>

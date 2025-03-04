@@ -552,6 +552,35 @@ export interface ApiProductProduct extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiPromptpayPromptpay extends Struct.CollectionTypeSchema {
+  collectionName: 'promptpays';
+  info: {
+    description: '';
+    displayName: 'promptpay';
+    pluralName: 'promptpays';
+    singularName: 'promptpay';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::promptpay.promptpay'
+    > &
+      Schema.Attribute.Private;
+    number: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiWalletWallet extends Struct.CollectionTypeSchema {
   collectionName: 'wallets';
   info: {
@@ -587,6 +616,7 @@ export interface ApiWalletWallet extends Struct.CollectionTypeSchema {
       'oneToOne',
       'plugin::users-permissions.user'
     >;
+    wallet_status: Schema.Attribute.Boolean;
   };
 }
 
@@ -1111,6 +1141,7 @@ declare module '@strapi/strapi' {
       'api::order.order': ApiOrderOrder;
       'api::product-key.product-key': ApiProductKeyProductKey;
       'api::product.product': ApiProductProduct;
+      'api::promptpay.promptpay': ApiPromptpayPromptpay;
       'api::wallet.wallet': ApiWalletWallet;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;

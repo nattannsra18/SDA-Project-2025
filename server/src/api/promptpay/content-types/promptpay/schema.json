@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "promptpays",
+  "info": {
+    "singularName": "promptpay",
+    "pluralName": "promptpays",
+    "displayName": "promptpay",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "number": {
+      "type": "string"
+    }
+  }
+}
