@@ -576,7 +576,8 @@ export interface ApiWalletWallet extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     slip_image: Schema.Attribute.Media<
-      'images' | 'files' | 'videos' | 'audios'
+      'images' | 'files' | 'videos' | 'audios',
+      true
     >;
     transaction_history: Schema.Attribute.JSON;
     updatedAt: Schema.Attribute.DateTime;
