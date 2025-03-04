@@ -10,7 +10,7 @@ const All_Product = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ดึงค่าค้นหาจาก URL
+  // Get search query from URL
   const getSearchQuery = () => {
     const params = new URLSearchParams(location.search);
     return params.get("search") || "";
@@ -32,7 +32,7 @@ const All_Product = () => {
     fetchProducts();
   }, []);
 
-  // กรองสินค้าตามคำค้นหา
+  // Filter products by search query
   const searchQuery = getSearchQuery();
   const filteredProducts = searchQuery
     ? products.filter(product => 
@@ -49,15 +49,29 @@ const All_Product = () => {
     return "/product-images/default.jpg";
   };
 
-  // ฟังก์ชันเพิ่มสินค้าลงตะกร้าที่ปรับปรุงแล้ว
+  // Updated add to cart function
   const handleAddToCart = async (e, product) => {
     e.preventDefault();
     e.stopPropagation();
     
+    // Check if product is out of stock
+    if (product.amount <= 0) {
+      Swal.fire({
+        title: 'Out of Stock',
+        text: 'This product is currently unavailable',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#0078F2',
+        background: '#1a1a1a',
+        color: '#ffffff'
+      });
+      return;
+    }
+
     const userId = sessionStorage.getItem("userId");
     const token = sessionStorage.getItem("token");
   
-    // ตรวจสอบว่ามีการล็อกอินแล้วหรือไม่
+    // Check if user is logged in
     if (!userId || !token) {
       Swal.fire({
         title: 'Access Denied',
@@ -78,7 +92,7 @@ const All_Product = () => {
     }
   
     try {
-      // แสดง loading ขณะดำเนินการ
+      // Show loading
       Swal.fire({
         title: 'Adding to cart...',
         text: 'Please wait',
@@ -91,8 +105,7 @@ const All_Product = () => {
         color: '#ffffff',
       });
   
-      // ตรวจสอบข้อมูลตะกร้าสินค้าของผู้ใช้
-      console.log("Fetching cart data for user:", userId);
+      // Fetch user's cart
       const cartResponse = await axios.get(
         `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
         {
@@ -102,49 +115,29 @@ const All_Product = () => {
         }
       );
   
-      console.log("Cart response:", cartResponse.data);
-  
       if (cartResponse.data.data && cartResponse.data.data.length > 0) {
-        // กรณีมีตะกร้าสินค้าอยู่แล้ว
         const userCart = cartResponse.data.data[0];
-        
-        // Debug: ตรวจสอบข้อมูลตะกร้าที่ได้รับ
-        console.log("User cart:", userCart);
-        
         const cartDocumentId = userCart.documentId;
+        console.log("Full Cart Response:", JSON.stringify(cartResponse.data, null, 2));
+        console.log("User Cart:", JSON.stringify(userCart, null, 2));
+        const cartProducts = userCart.products
+        console.log("Cart Products:", cartProducts);
+
         
-        if (!cartDocumentId) {
-          console.error("Cart documentId not found in the response");
-          throw new Error("Cart documentId not found");
-        }
-        
-        // ตรวจสอบโครงสร้างข้อมูลสินค้าในตะกร้า
-        const cartProducts = userCart.attributes?.products?.data || [];
-        console.log("Cart products:", cartProducts);
-        
-        // ตรวจสอบและแสดงข้อมูล ID ของสินค้าเพื่อการทดสอบ
-        console.log("Checking for product with ID:", product.id);
-        console.log("Product documentId:", product.documentId);
-        cartProducts.forEach(p => {
-          console.log("Cart product ID:", p.id, "Cart product documentId:", p.documentId);
-        });
-        
-        // ตรวจสอบว่าเกมนี้มีในตะกร้าอยู่แล้วหรือไม่โดยเช็คทั้ง id และ documentId
+        // Check if product is already in cart using ONLY documentId
         const existingProduct = cartProducts.some(p => 
-          (p.id && p.id === product.id) || 
-          (p.documentId && p.documentId === product.documentId) ||
-          (p.attributes && p.attributes.id === product.id) ||
+          (p.documentId === product.documentId) || 
           (p.attributes && p.attributes.documentId === product.documentId)
         );
 
         if (existingProduct) {
-          // ปิด loading dialog
+          // Close loading dialog
           Swal.close();
           
-          // แสดงข้อความแจ้งเตือนว่ามีเกมในตะกร้าแล้ว
+          // Show warning that product is already in cart
           Swal.fire({
-            title: 'Game Already in Cart',
-            text: `${product.name} is already in your cart`,
+            title: 'Product Already in Cart',
+            text: `${product.name} is already in your shopping cart`,
             icon: 'info',
             confirmButtonText: 'View Cart',
             confirmButtonColor: '#0078F2',
@@ -160,10 +153,7 @@ const All_Product = () => {
           return;
         }
   
-        console.log("Updating cart with documentId:", cartDocumentId);
-        console.log("Adding product with documentId:", product.documentId);
-  
-        // ใช้ PUT request กับ documentId ตามเอกสาร Strapi 5
+        // Update cart with new product
         await axios.put(
           `http://localhost:1337/api/carts/${cartDocumentId}`,
           {
@@ -180,10 +170,7 @@ const All_Product = () => {
           }
         );
       } else {
-        // กรณียังไม่มีตะกร้า ทำการสร้างใหม่
-        console.log("Creating new cart for user:", userId);
-        console.log("Adding product with documentId:", product.documentId);
-        
+        // Create new cart
         await axios.post(
           `http://localhost:1337/api/carts`,
           {
@@ -202,7 +189,7 @@ const All_Product = () => {
         );
       }
   
-      // แสดงการแจ้งเตือนสำเร็จ
+      // Show success message
       Swal.fire({
         title: 'Added to Cart',
         text: `${product.name} has been added to your cart`,
@@ -222,17 +209,10 @@ const All_Product = () => {
     } catch (error) {
       console.error('Error adding to cart:', error);
       
-      // แสดงข้อมูล error ที่ละเอียดขึ้นเพื่อการ debug
-      console.log("Error details:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
-      
-      // แสดงข้อความแจ้งเตือนเมื่อเกิดข้อผิดพลาด
+      // Show error message
       Swal.fire({
         title: 'Error',
-        text: 'Could not add the game to your cart. Please try again.',
+        text: 'Could not add the product to your cart. Please try again.',
         icon: 'error',
         confirmButtonText: 'OK',
         confirmButtonColor: '#0078F2',
@@ -244,7 +224,7 @@ const All_Product = () => {
 
   const title = searchQuery 
     ? `Search Results: "${searchQuery}" (${filteredProducts.length} items)` 
-    : "ALL Products";
+    : "Store";
 
   return (
     <div className="all-product-container">
@@ -270,14 +250,18 @@ const All_Product = () => {
                       e.target.src = "/product-images/default.jpg";
                     }}
                   />
+                  {product.amount <= 0 && (
+                    <div className="sold-out-overlay">Sold Out</div>
+                  )}
                 </Link>
               </div>
               <div className="product-info">
                 <h3>{product.name}</h3>
                 <button 
-                  className="add-to-cart-btn" 
+                  className={`add-to-cart-btn ${product.amount <= 0 ? 'disabled' : ''}`}
                   onClick={(e) => handleAddToCart(e, product)}
-                  title="Add to cart"
+                  disabled={product.amount <= 0}
+                  title={product.amount <= 0 ? 'Out of Stock' : 'Add to cart'}
                 >+</button>
                 <p className="product-price">THB {product.price}</p>
               </div>
