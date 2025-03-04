@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "./navbar.css";
 import { GiLockedChest } from "react-icons/gi";
-import { FaSearch, FaUserCircle, FaTimes, FaSignOutAlt } from "react-icons/fa";
+import { FaSearch, FaUserCircle, FaTimes, FaSignOutAlt, FaWallet, FaUserAlt } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -10,105 +10,98 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState('account');
+  const [walletTransactions, setWalletTransactions] = useState([]);
 
-  // รวมฟังก์ชันการดึงค่าจาก URL และการล้างค่าเมื่อไปหน้าอื่น
+  // ดึงข้อมูล Wallet
   useEffect(() => {
-    if (location.pathname === "/store") {
-      if (location.search) {
-        // ถ้าอยู่ที่หน้า Store และมีพารามิเตอร์ค้นหา
-        const params = new URLSearchParams(location.search);
-        const query = params.get("search");
-        if (query) {
-          setSearchTerm(query);
-        }
-      } else {
-        // ถ้าอยู่ที่หน้า Store แต่ไม่มีพารามิเตอร์ค้นหา
-        setSearchTerm("");
-      }
-    } else {
-      // ถ้าไม่ได้อยู่ที่หน้า Store
-      setSearchTerm("");
-    }
-  }, [location.pathname, location.search]);
+    const fetchWalletData = async () => {
+      const token = sessionStorage.getItem("token");
+      const userId = sessionStorage.getItem("userId");
 
-  // ✅ ให้โลโก้คลิกแล้วนำทางไปหน้า Home
+      if (!token || !userId) return;
+
+      try {
+        const response = await axios.get(
+          `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.data.data.length > 0) {
+          const walletData = response.data.data[0];
+          setWalletBalance(walletData.balance);
+          setWalletTransactions(walletData.transaction_history || []);
+        }
+      } catch (error) {
+        console.error("Error fetching wallet data:", error);
+      }
+    };
+
+    fetchWalletData();
+  }, []);
+
+
   const handleLogoClick = () => {
     navigate("/home");
   };
 
-  // ✅ จัดการการค้นหา - เด้งไปหน้า Store ทันทีที่เริ่มพิมพ์
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
-    // ตรวจสอบว่ามีตัวอักษรหรือไม่ (ไม่นับช่องว่าง)
+
     if (value.trim()) {
-      // แต่ส่งค่าที่มี space ไปด้วย (ไม่ใช้ trim ตรงนี้)
       navigate(`/store?search=${encodeURIComponent(value)}`);
     } else if (location.pathname === "/store") {
-      // ถ้าลบคำค้นหาจนหมดและอยู่ที่หน้า Store ให้รีเฟรชหน้า Store โดยไม่มีพารามิเตอร์ค้นหา
       navigate("/store");
     }
   };
 
-  // ✅ เมื่อกด Enter ในช่องค้นหา
   const handleSearchSubmit = (e) => {
     if (e.key === "Enter" && searchTerm.trim()) {
       e.preventDefault();
-      // ส่งค่าที่มี space ไปด้วย
       navigate(`/store?search=${encodeURIComponent(searchTerm)}`);
     }
   };
 
-  // ✅ เมื่อคลิกที่ไอคอนค้นหา
   const handleSearchIconClick = () => {
     if (searchTerm.trim()) {
-      // ส่งค่าที่มี space ไปด้วย
       navigate(`/store?search=${encodeURIComponent(searchTerm)}`);
     }
   };
 
-  // ✅ ตรวจสอบการเข้าสู่ระบบและแสดงข้อมูลผู้ใช้
   const handleUserIconClick = async () => {
     const token = sessionStorage.getItem("token");
-    
+    const userId = sessionStorage.getItem("userId");
+
     if (!token) {
       navigate("/login");
       return;
     }
-    
-    if (userData) {
-      setShowModal(true);
-      return;
-    }
-    
+
+
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:1337/api/users/me", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setUserData(response.data);
       setShowModal(true);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      sessionStorage.removeItem("token");
-      navigate("/login");
+
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ ปิด Modal
   const handleCloseModal = () => {
     setShowModal(false);
   };
 
-  // ✅ Logout และล้าง sessionStorage
   const handleLogout = () => {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("userId");
@@ -117,15 +110,11 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  // ✅ ฟังก์ชันแปลงวันที่ให้อ่านง่าย
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  const handleTopUp = () => {
+    // ฟังก์ชันสำหรับการเติมเงิน
+    // สามารถเพิ่มโลจิกการเติมเงินหรือนำทางไปยังหน้าเติมเงินได้ที่นี่
+    setShowModal(false);
+    navigate("/top-up"); // สมมติว่ามีหน้าเติมเงิน
   };
 
   return (
@@ -137,17 +126,18 @@ const Navbar = () => {
         </div>
         <div className="wrapper2">
           <div className="search-box">
-            <input 
-              type="text" 
-              placeholder="Search Game" 
-              className="search-input" 
+            <input
+              type="text"
+              placeholder="Search Game"
+              className="search-input"
               value={searchTerm}
               onChange={handleSearchChange}
-              onKeyPress={handleSearchSubmit}
+              onKeyDown={handleSearchSubmit}
+              autoComplete="off"
             />
-            <FaSearch 
-              className="search-icon" 
-              style={{ cursor: "pointer" }} 
+            <FaSearch
+              className="search-icon"
+              style={{ cursor: "pointer" }}
               onClick={handleSearchIconClick}
             />
           </div>
@@ -162,16 +152,19 @@ const Navbar = () => {
           <div className={`tab ${location.pathname === "/cart" ? "active" : ""}`}>
             <Link className="link" to="/cart">Cart</Link>
           </div>
-          <div className={`tab ${location.pathname === "/Library" ? "active" : ""}`}>
-            <Link className="link" to="/Library">Library</Link>
+          <div className={`tab ${location.pathname === "/library" ? "active" : ""}`}>
+            <Link className="link" to="/library">Library</Link>
           </div>
           <div className={`tab ${location.pathname === "/about" ? "active" : ""}`}>
             <Link className="link" to="/about">About</Link>
           </div>
           <div className="wrapper4">
-            <div className="user_icon" onClick={handleUserIconClick} style={{ cursor: "pointer" }}>
-              <FaUserCircle />
-            </div>
+            <span className="wallet-balance">฿{walletBalance.toFixed(2)}</span>
+            <FaUserCircle
+              className="user_icon"
+              onClick={handleUserIconClick}
+              style={{ cursor: "pointer", marginLeft: "10px" }}
+            />
           </div>
         </div>
       </div>
@@ -180,33 +173,84 @@ const Navbar = () => {
         <div className="user-modal-overlay">
           <div className="user-modal-content">
             <div className="user-modal-header">
-              <h2>User Profile</h2>
-              <button 
-                className="close-button" 
-                onClick={handleCloseModal}
-              >
+              <h2>Your Profile</h2>
+              <button className="close-button" onClick={handleCloseModal}>
                 <FaTimes />
               </button>
             </div>
-            <div className="user-modal-body">
-              <div className="user-info-item">
-                <strong>Username:</strong>
-                <span>{userData?.username || "N/A"}</span>
-              </div>
-              <div className="user-info-item">
-                <strong>Email:</strong>
-                <span>{userData?.email || "N/A"}</span>
-              </div>
-              <div className="user-info-item">
-                <strong>Registration Date:</strong>
-                <span>{formatDate(userData?.createdAt)}</span>
-              </div>
-            </div>
-            <div className="user-modal-footer">
-              <button 
-                className="logout-button" 
-                onClick={handleLogout}
+
+            <div className="modal-tabs">
+              <button
+                className={`tab-button ${activeTab === 'account' ? 'active-tab' : ''}`}
+                onClick={() => setActiveTab('account')}
               >
+                <FaUserAlt className="tab-icon" />
+                Account Detail
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'wallet' ? 'active-tab' : ''}`}
+                onClick={() => setActiveTab('wallet')}
+              >
+                <FaWallet className="tab-icon" />
+                My Wallet
+              </button>
+            </div>
+
+            <div className="user-modal-body">
+              {activeTab === 'account' && (
+                <div className="account-details">
+                  <div className="user-info-item">
+                    <strong>Username:</strong>
+                    <span>{userData?.username || "N/A"}</span>
+                  </div>
+                  <div className="user-info-item">
+                    <strong>Email:</strong>
+                    <span>{userData?.email || "N/A"}</span>
+                  </div>
+                  <div className="user-info-item">
+                    <strong>Member Since:</strong>
+                    <span>{userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : "N/A"}</span>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'wallet' && (
+                <div className="wallet-details">
+                  <div className="wallet-info-header">
+                    <h3>Wallet Balance</h3>
+                    <span className="wallet-amount">฿{walletBalance.toFixed(2)}</span>
+                  </div>
+
+                  <div className="transaction-history">
+                    <h4>Recent Transactions</h4>
+                    {walletTransactions.length > 0 ? (
+                      <div className="transaction-list">
+                        {walletTransactions.map((transaction, index) => (
+                          <div key={index} className="transaction-item">
+                            <div className="transaction-details">
+                              <span className="transaction-name">{transaction.type}</span>
+                              <span className="transaction-date">{new Date(transaction.date).toLocaleDateString()}</span>
+                            </div>
+                            <span className={`transaction-amount ${transaction.amount > 0 ? 'positive' : 'negative'}`}>
+                              {transaction.amount > 0 ? '+' : ''}฿{transaction.amount.toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="no-transactions">No recent transactions</p>
+                    )}
+                  </div>
+
+                  <button className="top-up-button" onClick={handleTopUp}>
+                    Top Up Wallet
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="user-modal-footer">
+              <button className="logout-button" onClick={handleLogout}>
                 <FaSignOutAlt /> Logout
               </button>
             </div>

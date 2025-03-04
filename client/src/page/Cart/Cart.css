@@ -115,18 +115,6 @@ body {
     font-size: 14px;
   }
   
-  .epic-reward {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    color: #FFD700;
-    font-size: 14px;
-  }
-  
-  .reward-icon {
-    margin-right: 8px;
-  }
-  
   .self-refundable {
     display: flex;
     align-items: center;

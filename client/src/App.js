@@ -14,6 +14,8 @@ import Login from "./page/Login/login";
 import Product  from "./Component/Product/Product";
 import Register from "./page/Register/Register";
 import Home from "./page/Home/Home";
+
+
 const Layout = () => { 
   return(
     <div className="app"> 

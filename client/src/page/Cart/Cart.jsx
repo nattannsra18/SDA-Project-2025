@@ -153,7 +153,7 @@ const Cart = () => {
   const handleRemoveFromCart = async (productId) => {
     customSwal.fire({
       title: 'Remove from Cart?',
-      text: 'Are you sure you want to remove this title from your card?',
+      text: 'Are you sure you want to remove this title from your cart?',
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes, remove it',
@@ -168,7 +168,7 @@ const Cart = () => {
             customSwal.fire({
               icon: 'error',
               title: 'Access Denied',
-              text: 'Please sign in to manage your card'
+              text: 'Please sign in to manage your cart'
             });
             return;
           }
@@ -187,7 +187,7 @@ const Cart = () => {
             customSwal.fire({
               icon: 'error',
               title: 'Cart Not Found',
-              text: 'Your card seems to be missing.'
+              text: 'Your cart seems to be missing.'
             });
             return;
           }
@@ -240,13 +240,13 @@ const Cart = () => {
   };
 
   if (loading) {
-    return <div className="loading">Summoning your card...</div>;
+    return <div className="loading">Summoning your cart...</div>;
   }
 
   return (
     <div className="cart-page">
       <div className="cart-container">
-        <h1>Your Card</h1>
+        <h1>Your cart</h1>
         <div className="cart-content">
           <div className="cart-items">
             {cartItems.length === 0 ? (
