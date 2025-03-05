@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.8.1",
     "bootstrap": "^5.3.3",
+    "lucide-react": "^0.477.0",
     "promptpay-qr": "^0.5.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",

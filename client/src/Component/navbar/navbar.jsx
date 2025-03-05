@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import "./navbar.css";
 import TopUp from "../TopUp/TopUp";
 import { GiLockedChest } from "react-icons/gi";
-import { FaSearch, FaUserCircle, FaTimes, FaSignOutAlt, FaWallet, FaUserAlt } from "react-icons/fa";
+import { FaSearch, FaUserCircle, FaTimes, FaSignOutAlt, FaWallet, FaUserAlt, FaLock } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Swal from "sweetalert2";
+import { Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
+
 
 const Navbar = () => {
   const location = useLocation();
@@ -19,38 +22,44 @@ const Navbar = () => {
   const [activeTab, setActiveTab] = useState('account');
   const [walletTransactions, setWalletTransactions] = useState([]);
 
- // ดึงข้อมูล Wallet
-useEffect(() => {
-  const fetchWalletData = async () => {
-    const token = sessionStorage.getItem("token");
-    const userId = sessionStorage.getItem("userId");
+  // State สำหรับการเปลี่ยนรหัสผ่าน
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmNewPassword: ""
+  });
 
-    if (!token || !userId) return;
+  // ดึงข้อมูล Wallet
+  useEffect(() => {
+    const fetchWalletData = async () => {
+      const token = sessionStorage.getItem("token");
+      const userId = sessionStorage.getItem("userId");
 
-    try {
-      const response = await axios.get(
-        `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
+      if (!token || !userId) return;
+
+      try {
+        const response = await axios.get(
+          `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (response.data.data.length > 0) {
+          const walletData = response.data.data[0];
+          setWalletBalance(walletData.balance);
+          setWalletStatus(walletData.wallet_status);
+
+          // เอาทุกธุรกรรม ไม่กรองตามสถานะ Wallet
+          setWalletTransactions(walletData.transaction_history);
         }
-      );
-
-      if (response.data.data.length > 0) {
-        const walletData = response.data.data[0];
-        setWalletBalance(walletData.balance);
-        setWalletStatus(walletData.wallet_status);
-
-        // เอาทุกธุรกรรม ไม่กรองตามสถานะ Wallet
-        setWalletTransactions(walletData.transaction_history);
+      } catch (error) {
+        console.error("Error fetching wallet data:", error);
       }
-    } catch (error) {
-      console.error("Error fetching wallet data:", error);
-    }
-  };
+    };
 
-  fetchWalletData();
-}, []);
-
+    fetchWalletData();
+  }, []);
 
   // ดึงค่าจาก URL และเคลียร์เมื่อเปลี่ยนหน้า
   useEffect(() => {
@@ -68,6 +77,112 @@ useEffect(() => {
       setSearchTerm("");
     }
   }, [location.pathname, location.search]);
+
+  // จัดการการเปลี่ยนแปลงข้อมูลรหัสผ่าน
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+
+  // เพิ่มฟังก์ชันสลับการแสดงรหัสผ่าน
+  const togglePasswordVisibility = (field) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+  // ฟังก์ชันส่งคำขอเปลี่ยนรหัสผ่าน
+  const submitPasswordChange = async (e) => {
+    e.preventDefault();
+
+    // ตรวจสอบความถูกต้องของรหัสผ่าน
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      Swal.fire({
+        title: 'Error',
+        text: 'New passwords do not match',
+        icon: 'error',
+        customClass: {
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          content: 'custom-swal-content',
+          confirmButton: 'custom-swal-confirm-button'
+        },
+        background: '#18181C',
+        color: '#ffffff',
+        confirmButtonColor: '#D70000'
+      });
+      return;
+    }
+
+    try {
+      const token = sessionStorage.getItem("token");
+      const response = await axios.post(
+        "http://localhost:1337/api/auth/change-password",
+        {
+          currentPassword: passwordData.currentPassword,
+          password: passwordData.newPassword,
+          passwordConfirmation: passwordData.confirmNewPassword
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      // แสดงข้อความสำเร็จ
+      await Swal.fire({
+        title: 'Password Changed',
+        text: 'Your password has been successfully updated',
+        icon: 'success',
+        customClass: {
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          content: 'custom-swal-content',
+          confirmButton: 'custom-swal-confirm-button'
+        },
+        background: '#18181C',
+        color: '#ffffff',
+        confirmButtonColor: '#3D9BDC'
+      });
+
+      // ปิด Modal หลังจากเปลี่ยนรหัสผ่านสำเร็จ
+      setShowModal(false);
+
+      // รีเซ็ตข้อมูลรหัสผ่าน
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmNewPassword: ""
+      });
+      
+      // รีโหลดหน้าเว็บ
+      window.location.reload();
+    } catch (error) {
+      // จัดการข้อผิดพลาดในการเปลี่ยนรหัสผ่าน
+      Swal.fire({
+        title: 'Error',
+        text: error.response?.data?.message || 'Failed to change password',
+        icon: 'error',
+        customClass: {
+          popup: 'custom-swal-popup',
+          title: 'custom-swal-title',
+          content: 'custom-swal-content',
+          confirmButton: 'custom-swal-confirm-button'
+        },
+        background: '#18181C',
+        color: '#ffffff',
+        confirmButtonColor: '#D70000'
+      });
+    }
+  };
 
   const handleLogoClick = () => {
     navigate("/home");
@@ -110,7 +225,6 @@ useEffect(() => {
       const response = await axios.get("http://localhost:1337/api/users/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setUserData(response.data);
       setShowModal(true);
 
@@ -121,6 +235,7 @@ useEffect(() => {
 
   const handleCloseModal = () => {
     setShowModal(false);
+    window.location.reload();
   };
 
   const handleLogout = () => {
@@ -135,6 +250,7 @@ useEffect(() => {
     setShowModal(false);
     setShowTopUpModal(true);
   };
+
 
   return (
     <>
@@ -216,6 +332,13 @@ useEffect(() => {
                 <FaWallet className="tab-icon" />
                 My Wallet
               </button>
+              <button
+                className={`tab-button ${activeTab === 'password' ? 'active-tab' : ''}`}
+                onClick={() => setActiveTab('password')}
+              >
+                <FaLock className="tab-icon" />
+                Change Password
+              </button>
             </div>
 
             <div className="user-modal-body">
@@ -250,37 +373,38 @@ useEffect(() => {
                     <h4>Recent Transactions</h4>
                     {walletTransactions.length > 0 ? (
                       <div className="transaction-list">
-                        {walletTransactions.map((transaction, index) => {
-                          // Parse the date and format it with time
-                          const transactionDate = new Date(transaction.timestamp || transaction.date);
-                          const formattedDate = transactionDate.toLocaleString('en-US', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true
-                          });
+                        {walletTransactions
+                          .sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date))
+                          .map((transaction, index) => {
+                            const transactionDate = new Date(transaction.timestamp || transaction.date);
+                            const formattedDate = transactionDate.toLocaleString('en-US', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: true
+                            });
 
-                          return (
-                            <div key={index} className="transaction-item">
-                              <div className="transaction-details">
-                                <div className="transaction-top-row">
-                                  <span className="transaction-name">{transaction.type}</span>
-                                  {transaction.status && (
-                                    <span className={`transaction-status ${transaction.status.toLowerCase()}`}>
-                                      {transaction.status}
-                                    </span>
-                                  )}
+                            return (
+                              <div key={index} className="transaction-item">
+                                <div className="transaction-details">
+                                  <div className="transaction-top-row">
+                                    <span className="transaction-name">{transaction.type}</span>
+                                    {transaction.status && (
+                                      <span className={`transaction-status ${transaction.status.toLowerCase()}`}>
+                                        {transaction.status}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="transaction-date">{formattedDate}</span>
                                 </div>
-                                <span className="transaction-date">{formattedDate}</span>
+                                <span className={`transaction-amount ${transaction.amount > 0 ? 'positive' : 'negative'}`}>
+                                  {transaction.amount > 0 ? '+' : ''}฿{transaction.amount.toFixed(2)}
+                                </span>
                               </div>
-                              <span className={`transaction-amount ${transaction.amount > 0 ? 'positive' : 'negative'}`}>
-                                {transaction.amount > 0 ? '+' : ''}฿{transaction.amount.toFixed(2)}
-                              </span>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
                       </div>
                     ) : (
                       <p className="no-transactions">No recent transactions</p>
@@ -290,6 +414,87 @@ useEffect(() => {
                   <button className="top-up-button" onClick={handleTopUp}>
                     Top Up Wallet
                   </button>
+                </div>
+              )}
+
+              {activeTab === 'password' && (
+                <div className="password-change-section">
+                  <form onSubmit={submitPasswordChange} className="password-change-form">
+                    <div className="password-input-wrapper">
+                      <div className="password-input-group">
+                        <div className="input-icon-wrapper">
+                          <KeyRound className="input-icon" />
+                          <input
+                            type={showPasswords.current ? "text" : "password"}
+                            name="currentPassword"
+                            value={passwordData.currentPassword}
+                            onChange={handlePasswordChange}
+                            className="password-input"
+                            placeholder="Current Password"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility('current')}
+                            className="password-visibility-toggle"
+                          >
+                            {showPasswords.current ? <EyeOff size={20} /> : <Eye size={20} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="password-input-group">
+                        <div className="input-icon-wrapper">
+                          <ShieldCheck className="input-icon" />
+                          <input
+                            type={showPasswords.new ? "text" : "password"}
+                            name="newPassword"
+                            value={passwordData.newPassword}
+                            onChange={handlePasswordChange}
+                            className="password-input"
+                            placeholder="New Password"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility('new')}
+                            className="password-visibility-toggle"
+                          >
+                            {showPasswords.new ? <EyeOff size={20} /> : <Eye size={20} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="password-input-group">
+                        <div className="input-icon-wrapper">
+                          <ShieldCheck className="input-icon" />
+                          <input
+                            type={showPasswords.confirm ? "text" : "password"}
+                            name="confirmNewPassword"
+                            value={passwordData.confirmNewPassword}
+                            onChange={handlePasswordChange}
+                            className="password-input"
+                            placeholder="Confirm New Password"
+                            required
+                          />
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility('confirm')}
+                            className="password-visibility-toggle"
+                          >
+                            {showPasswords.confirm ? <EyeOff size={20} /> : <Eye size={20} />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="password-change-submit-button"
+                    >
+                      Change Password
+                    </button>
+                  </form>
                 </div>
               )}
             </div>

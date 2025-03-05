@@ -22,14 +22,14 @@ const TopUp = () => {
     useEffect(() => {
         const token = sessionStorage.getItem("token");
         const userId = sessionStorage.getItem("userId");
-        
+
         // Fetch PromptPay ID
         const fetchPromptPayId = async () => {
             try {
                 const response = await axios.get('http://localhost:1337/api/promptpays', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 if (response.data.data.length > 0) {
                     setPromptPayId(response.data.data[0].number);
                 }
@@ -60,12 +60,10 @@ const TopUp = () => {
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-    
+
             if (response.data.data.length > 0) {
-                // หากมี wallet อยู่แล้ว ให้ set wallet นั้น
                 setWalletData(response.data.data[0]);
             } else {
-                // หากยังไม่มี wallet ให้สร้าง wallet ใหม่
                 await createNewWallet(userId, token);
             }
         } catch (error) {
@@ -73,11 +71,11 @@ const TopUp = () => {
             setError("Failed to fetch wallet data. Please try again.");
         }
     };
-    
+
     const createNewWallet = async (userId, token) => {
         try {
             const response = await axios.post(
-                'http://localhost:1337/api/wallets', 
+                'http://localhost:1337/api/wallets',
                 {
                     data: {
                         user: userId,
@@ -87,17 +85,15 @@ const TopUp = () => {
                     }
                 },
                 {
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}` 
+                        Authorization: `Bearer ${token}`
                     }
                 }
             );
-    
+
             if (response.data.data) {
-                // ตรวจสอบอีกครั้งก่อน set wallet
-                const newWallet = response.data.data;
-                setWalletData(newWallet);
+                setWalletData(response.data.data);
             }
         } catch (error) {
             console.error("Error creating wallet:", error);
@@ -163,107 +159,79 @@ const TopUp = () => {
             });
             return;
         }
-    
-        const token = sessionStorage.getItem("token");
-        const userId = sessionStorage.getItem("userId");
-    
+
+        if (!walletData) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Wallet information not found',
+                background: '#1e1e2a',
+                color: '#ffffff'
+            });
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("files", slipImage);
+
         try {
-            // ตรวจสอบ wallet ของผู้ใช้ก่อน
-            let currentWallet = walletData;
-            
-            if (!currentWallet) {
-                const walletResponse = await axios.get(
-                    `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                );
-    
-                if (walletResponse.data.data.length > 0) {
-                    // ใช้ wallet ที่มีอยู่
-                    currentWallet = walletResponse.data.data[0];
-                    setWalletData(currentWallet);
-                } else {
-                    // สร้าง wallet ใหม่เพียงครั้งเดียว
-                    const newWalletResponse = await axios.post(
-                        'http://localhost:1337/api/wallets', 
-                        {
-                            data: {
-                                user: userId,
-                                balance: 0,
-                                wallet_status: true,
-                                transaction_history: []
-                            }
-                        },
-                        {
-                            headers: { 
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${token}` 
-                            }
-                        }
-                    );
-    
-                    currentWallet = newWalletResponse.data.data;
-                    setWalletData(currentWallet);
-                }
-            }
-    
-            const formData = new FormData();
-            formData.append("files", slipImage);
-        
-            // อัปโหลดสลิป
+            const token = sessionStorage.getItem("token");
+
+            // Upload slip image
             const uploadResponse = await axios.post(
-                `http://localhost:1337/api/upload`, 
+                `http://localhost:1337/api/upload`,
                 formData,
                 {
-                    headers: { 
+                    headers: {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data'
                     }
                 }
             );
-        
-            // คำนวณยอดเงินใหม่
-            const newBalance = currentWallet.balance + parseFloat(topUpAmount);
-            
-            // สร้างรายการธุรกรรม
+
+            // Calculate new balance
+            const newBalance = walletData.balance + parseFloat(topUpAmount);
+
+            // Create current date and time
             const currentDateTime = new Date();
+
+            // Create transaction with detailed timestamp
             const newTransaction = {
                 type: "top-up",
                 amount: parseFloat(topUpAmount),
                 status: "pending",
-                date: currentDateTime.toISOString().split('T')[0],
-                time: currentDateTime.toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
-                    minute: '2-digit', 
-                    hour12: true 
-                }),
-                timestamp: currentDateTime.toISOString()
+                date: currentDateTime.toISOString().split('T')[0], // Date in YYYY-MM-DD format
+                time: currentDateTime.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                }), // Time in 12-hour format
+                timestamp: currentDateTime.toISOString() // Full ISO timestamp
             };
-            
-            // อัปเดต wallet
+
+            // Update wallet with new balance, slip image, and transaction history
             const updateResponse = await axios.put(
-                `http://localhost:1337/api/wallets/${currentWallet.id}`, 
+                `http://localhost:1337/api/wallets/${walletData.documentId}`,
                 {
-                    data: { 
+                    data: {
                         slip_image: uploadResponse.data[0].id,
                         balance: newBalance,
                         wallet_status: false,
                         transaction_history: [
-                            ...currentWallet.transaction_history,
+                            ...walletData.transaction_history,
                             newTransaction
                         ]
-                    } 
+                    }
                 },
                 {
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`
                     }
                 }
             );
-        
-            // ปิดโมดอลและโหลดหน้าใหม่
+
+            // Close upload slip modal and open processing modal
             setIsUploadSlipModalOpen(false);
             setIsProcessingModalOpen(true);
         } catch (error) {
@@ -322,7 +290,7 @@ const TopUp = () => {
             </div>
         );
     };
-    
+
     return (
         <>
             {isTopUpAmountModalOpen && (
@@ -332,9 +300,13 @@ const TopUp = () => {
                             <h2>
                                 <FaWallet /> Top Up Wallet
                             </h2>
-                            <button className="close-button" onClick={() => setIsTopUpAmountModalOpen(false)}>
+                            <button className="close-button" onClick={() => {
+                                setIsUploadSlipModalOpen(false);
+                                window.location.reload(); // รีเฟรชหน้าหลังจากปิด Modal
+                            }}>
                                 <FaTimes />
                             </button>
+
                         </div>
                         <div className="top-up-modal-body">
                             <div className="top-up-amount-selection">
@@ -393,7 +365,10 @@ const TopUp = () => {
                                 Back
                             </button>
                             <h2>Payment Slip</h2>
-                            <button className="close-button" onClick={() => setIsUploadSlipModalOpen(false)}>
+                            <button className="close-button" onClick={() => {
+                                setIsUploadSlipModalOpen(false);
+                                window.location.reload(); // รีเฟรชหน้าหลังจากปิด Modal`
+                            }}>
                                 <FaTimes />
                             </button>
                         </div>
@@ -401,10 +376,10 @@ const TopUp = () => {
                             <div className="qr-code-container">
                                 {qrCode ? (
                                     <div className="qr-code-wrapper">
-                                        <QRCodeCanvas 
-                                            value={qrCode} 
-                                            size={256} 
-                                            level="H" 
+                                        <QRCodeCanvas
+                                            value={qrCode}
+                                            size={256}
+                                            level="H"
                                             bgColor="white"
                                             fgColor="black"
                                         />
@@ -450,8 +425,8 @@ const TopUp = () => {
                             <h2>Slip Upload Successful</h2>
                             <p>Your payment slip has been uploaded and is pending verification.</p>
                             <p>Our team will review your slip shortly.</p>
-                            <button 
-                                className="confirm-top-up-button" 
+                            <button
+                                className="confirm-top-up-button"
                                 onClick={() => {
                                     setIsProcessingModalOpen(false);
                                     window.location.reload();
