@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaWindows } from 'react-icons/fa';
-import { BsInfoCircle, BsLightningFill } from 'react-icons/bs';
-import './Cart.css';
+import { BsInfoCircle } from 'react-icons/bs';
 import Swal from 'sweetalert2';
 import PurchaseModal from '../../Component/PurchaseModal/PurchaseModal';
+import './Cart.css';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -57,14 +56,14 @@ const Cart = () => {
             const imageUrl = product.image?.[0]?.formats?.small?.url || product.image?.[0]?.url;
             return {
               id: product.id,
-              documentId: product.documentId,
               name: product.name,
               price: product.price,
               description: product.description,
               age1: product.age1,
               age: product.age,
               imageUrl: imageUrl ? `http://localhost:1337${imageUrl}` : null,
-              genre: product.genre
+              genre: product.genre,
+              documentId: product.documentId
             };
           });
 
@@ -126,12 +125,14 @@ const Cart = () => {
       );
 
       const userCart = cartResponse.data.data[0];
+
       if (!userCart) {
         console.error('Cart not found for user:', userId);
         return;
       }
 
       const cartDocumentId = userCart.documentId;
+
       await axios.put(
         `http://localhost:1337/api/carts/${cartDocumentId}`,
         {
@@ -238,13 +239,21 @@ const Cart = () => {
     return number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const handlePurchaseClose = () => {
-    setIsPurchaseModalOpen(false);
-  };
-
   if (loading) {
     return <div className="loading">Summoning your cart...</div>;
   }
+
+  const handleCheckout = () => {
+    if (cartItems.length > 0) {
+      setIsPurchaseModalOpen(true);
+    } else {
+      customSwal.fire({
+        icon: 'info',
+        title: 'Empty Cart',
+        text: 'Your cart is empty. Add some games first!'
+      });
+    }
+  };
 
   return (
     <div className="cart-page">
@@ -329,22 +338,24 @@ const Cart = () => {
             </div>
             <button
               className="checkout-btn"
-              onClick={() => setIsPurchaseModalOpen(true)}
+              onClick={handleCheckout}
               disabled={cartItems.length === 0}
             >
               Purchase Now
             </button>
-            <PurchaseModal
-              isOpen={isPurchaseModalOpen}
-              onClose={handlePurchaseClose}
-              totalPrice={totalPrice}
-              cartItems={cartItems}
-            />
           </div>
+
+          {/* Add PurchaseModal component */}
+          <PurchaseModal
+            isOpen={isPurchaseModalOpen}
+            onClose={() => setIsPurchaseModalOpen(false)}
+            totalPrice={totalPrice}
+            cartItems={cartItems}
+          />
         </div>
       </div>
     </div>
-  );
+  );        
 }
 
 export default Cart;

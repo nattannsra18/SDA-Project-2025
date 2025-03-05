@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import './PurchaseModal.css';
+import { useNavigate } from "react-router-dom";
 
 const PurchaseModal = ({ 
   isOpen, 
@@ -12,6 +14,8 @@ const PurchaseModal = ({
   const [walletStatus, setWalletStatus] = useState(false);
   const [walletDocumentId, setWalletDocumentId] = useState(null);
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const navigate = useNavigate();
 
   const customSwal = Swal.mixin({
     customClass: {
@@ -50,7 +54,6 @@ const PurchaseModal = ({
         );
   
         const wallet = walletResponse.data.data[0];
-        console.log("wallet", wallet);
         if (wallet) {
           setWalletBalance(parseFloat(wallet.balance || 0));
           setWalletStatus(wallet.wallet_status === true);
@@ -73,6 +76,7 @@ const PurchaseModal = ({
 
   const handlePurchase = async () => {
     try {
+      setProcessingPayment(true);
       const userId = sessionStorage.getItem("userId");
       const token = sessionStorage.getItem("token");
   
@@ -83,6 +87,7 @@ const PurchaseModal = ({
           title: 'Payment Pending',
           text: 'Your payment slip is being verified. Please wait until our team completes the review.'
         });
+        setProcessingPayment(false);
         return;
       }
   
@@ -93,6 +98,7 @@ const PurchaseModal = ({
           title: 'Insufficient Balance',
           text: 'Your wallet balance is insufficient for this purchase.'
         });
+        setProcessingPayment(false);
         return;
       }
   
@@ -195,14 +201,17 @@ const PurchaseModal = ({
       customSwal.fire({
         icon: 'success',
         title: 'Purchase Successful',
-        text: 'Your games have been added to your library'
+        text: 'Your games have been added to your library. Check them out now!',
+        confirmButtonText: 'Go to Library',
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.reload();
+          navigate('/library');
         }
       });
   
+  
       onClose(); // Close modal after successful purchase
+      setProcessingPayment(false);
     } catch (error) {
       console.error('Purchase error:', error);
       customSwal.fire({
@@ -210,6 +219,7 @@ const PurchaseModal = ({
         title: 'Purchase Failed',
         text: 'Unable to complete your purchase. Please try again.'
       });
+      setProcessingPayment(false);
     }
   };
   
@@ -221,89 +231,111 @@ const PurchaseModal = ({
     setIsConfirmationModalOpen(false);
   };
   
-  // ถ้า isOpen เป็น false ให้ return null
   if (!isOpen) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-[#1E1E1E] rounded-lg p-6 w-96">
-          <h2 className="text-2xl font-bold text-white mb-4">Order Summary</h2>
-          
-          {cartItems.map((item) => (
-            <div key={item.id} className="flex justify-between mb-2">
-              <span className="text-white">{item.name}</span>
-              <span className="text-white">THB {item.price.toFixed(2)}</span>
+    <div className="purchase-modal-overlay">
+      <div className="purchase-modal">
+        <div className="purchase-modal-header">
+          <h2>Confirm Your Purchase</h2>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+
+        <div className="purchase-modal-content">
+          <div className="purchase-summary">
+            <h3>Order Summary</h3>
+            <div className="purchase-items">
+              {cartItems.map(item => (
+                <div key={item.id} className="purchase-item">
+                  <span>{item.name}</span>
+                  <span>THB {item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              ))}
             </div>
-          ))}
-          
-          <div className="border-t border-gray-700 my-4"></div>
-          
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-400">Subtotal</span>
-            <span className="text-white">THB {totalPrice.toFixed(2)}</span>
+            <div className="purchase-total">
+              <strong>Total:</strong> 
+              <strong>THB {totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+            </div>
           </div>
-          
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-400">Wallet Balance</span>
-            <span className="text-white">THB {walletBalance.toFixed(2)}</span>
+
+          <div className="purchase-wallet-info">
+            <h3>Wallet Information</h3>
+            <div className="wallet-details">
+              <div className="wallet-balance">
+                Wallet Balance: 
+                <span>THB {walletBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="wallet-status">
+                Status: 
+                <span>{walletStatus ? 'Verified' : 'Pending Verification'}</span>
+              </div>
+            </div>
           </div>
-          
+        </div>
+
+        <div className="purchase-modal-actions">
           <button 
-            onClick={openConfirmationModal}
-            className="w-full bg-[#0078F2] text-white py-2 rounded mt-4 hover:bg-[#005AC1] transition"
-          >
-            Confirm Purchase
-          </button>
-          
-          <button 
+            className="cancel-btn" 
             onClick={onClose}
-            className="w-full text-gray-400 py-2 rounded mt-2 hover:text-white transition"
+            disabled={processingPayment}
           >
             Cancel
+          </button>
+          <button 
+            className="confirm-btn" 
+            onClick={openConfirmationModal}
+            disabled={processingPayment || !walletStatus || walletBalance < totalPrice}
+          >
+            Confirm Purchase
           </button>
         </div>
       </div>
 
       {isConfirmationModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#1E1E1E] rounded-lg p-6 w-96">
-            <h2 className="text-2xl font-bold text-white mb-4">Confirm Order</h2>
-            <p className="text-white mb-4">Are you sure you want to complete this purchase?</p>
-            
-            <div className="order-confirmation-summary">
-              <h3 className="text-lg font-semibold text-white mb-2">Order Summary</h3>
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex justify-between mb-1">
-                  <span className="text-gray-300">{item.name}</span>
-                  <span className="text-gray-300">THB {item.price.toFixed(2)}</span>
-                </div>
-              ))}
-              <div className="border-t border-gray-700 my-2"></div>
-              <div className="flex justify-between">
-                <span className="text-white font-bold">Total</span>
-                <span className="text-white font-bold">THB {totalPrice.toFixed(2)}</span>
-              </div>
+        <div className="confirmation-modal-overlay">
+          <div className="confirmation-modal">
+            <div className="confirmation-modal-header">
+              <h2>Confirm Order</h2>
+              <button className="close-btn" onClick={closeConfirmationModal}>×</button>
             </div>
             
-            <div className="flex justify-between mt-4">
+            <div className="confirmation-modal-content">
+              <p>Are you sure you want to complete this purchase?</p>
+              
+              <div className="order-confirmation-summary">
+                <h3>Order Summary</h3>
+                {cartItems.map((item) => (
+                  <div key={item.id} className="confirmation-item">
+                    <span>{item.name}</span>
+                    <span>THB {item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                ))}
+                <div className="confirmation-total">
+                  <strong>Total:</strong>
+                  <strong>THB {totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="confirmation-modal-actions">
               <button 
                 onClick={closeConfirmationModal}
-                className="w-[48%] text-gray-400 py-2 rounded hover:text-white transition border border-gray-600"
+                className="cancel-btn"
               >
                 Cancel
               </button>
               <button 
                 onClick={handlePurchase}
-                className="w-[48%] bg-[#0078F2] text-white py-2 rounded hover:bg-[#005AC1] transition"
+                className="confirm-btn"
+                disabled={processingPayment}
               >
-                Confirm
+                {processingPayment ? 'Processing...' : 'Confirm'}
               </button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
