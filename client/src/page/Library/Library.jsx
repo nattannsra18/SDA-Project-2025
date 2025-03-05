@@ -41,60 +41,64 @@ const Library = () => {
     try {
       const userId = sessionStorage.getItem("userId");
       const token = sessionStorage.getItem("token");
-  
+
       if (!userId || !token) {
         customSwal.fire({
           icon: 'error',
           title: 'Access Denied',
-          text: 'Please sign in to view your library'
+          text: 'Please sign in to view your library',
         });
         setLoading(false);
         return;
       }
-  
+
+      // Fetch data from the updated endpoint
       const response = await axios.get(
-        `http://localhost:1337/api/product-keys?filters[owner][id][$eq]=${userId}&populate[product][populate]=image`,
+        `http://localhost:1337/api/product-keys?filters[owner][id][$eq]=${userId}&populate[products][populate]=image`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-  
+
       if (response.data.data && response.data.data.length > 0) {
-        const userLibrary = response.data.data.map(item => {
-          const product = item.product;
-          const imageUrl = product.image?.[0]?.formats?.small?.url || 
-                           product.image?.[0]?.url;
-          
+        // Map the response data to extract relevant information
+        const userLibrary = response.data.data.map((item) => {
+          const product = item.products?.[0]; // Assuming 'products' is an array, use the first product
+          const imageUrl =
+            product?.image?.[0]?.formats?.small?.url || product?.image?.[0]?.url;
+
           return {
-            id: product.id,
-            name: product.name,
-            description: product.description,   
+            id: product?.id,
+            name: product?.name,
+            description: product?.description,
             imageUrl: imageUrl ? `http://localhost:1337${imageUrl}` : null,
-            gameKey: item.key
+            gameKey: item.key,
           };
         });
-  
+
         setGames(userLibrary);
       } else {
         setGames([]);
       }
-  
+
       setLoading(false);
     } catch (error) {
       console.error('Error fetching library data:', error);
       customSwal.fire({
         icon: 'error',
         title: 'Connection Lost',
-        text: 'Your library could not be loaded. Please try again.'
+        text: 'Your library could not be loaded. Please try again.',
       });
       setGames([]);
       setLoading(false);
     }
   };
-   fetchLibraryGames();
- }, []);
+
+  fetchLibraryGames();
+}, []);
+
 
  // Sorting function
  const sortedGames = games

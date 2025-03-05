@@ -51,9 +51,9 @@
     },
     "product_keys": {
       "type": "relation",
-      "relation": "oneToMany",
+      "relation": "manyToMany",
       "target": "api::product-key.product-key",
-      "mappedBy": "product"
+      "inversedBy": "products"
     }
   }
 }

@@ -45,12 +45,15 @@ const Login = () => {
       sessionStorage.setItem("token", response.data.jwt);
       sessionStorage.setItem("userId", response.data.user.id);
       sessionStorage.setItem("username", response.data.user.username);
+      sessionStorage.setItem("email", response.data.user.email);
+      sessionStorage.setItem("userDocumentId", response.data.user.documentId);
       
       // Log stored session storage items
       console.log('--- Stored Session Data ---');
       console.log('Stored Token:', sessionStorage.getItem("token"));
       console.log('Stored User ID:', sessionStorage.getItem("userId"));
       console.log('Stored Username:', sessionStorage.getItem("username"));
+      console.log('Stored documentId:', sessionStorage.getItem("userDocumentId"));
       // Set default authorization header
       axios.defaults.headers.common = {
         Authorization: `Bearer ${response.data.jwt}`,

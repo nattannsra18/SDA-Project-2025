@@ -20,12 +20,6 @@
       "target": "plugin::users-permissions.user",
       "inversedBy": "product_keys"
     },
-    "product": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::product.product",
-      "inversedBy": "product_keys"
-    },
     "key_status": {
       "type": "enumeration",
       "enum": [
@@ -39,6 +33,12 @@
     },
     "is_used": {
       "type": "boolean"
+    },
+    "products": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product.product",
+      "inversedBy": "product_keys"
     }
   }
 }

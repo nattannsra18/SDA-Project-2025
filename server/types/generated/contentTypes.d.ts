@@ -499,7 +499,7 @@ export interface ApiProductKeyProductKey extends Struct.CollectionTypeSchema {
       'manyToOne',
       'plugin::users-permissions.user'
     >;
-    product: Schema.Attribute.Relation<'manyToOne', 'api::product.product'>;
+    products: Schema.Attribute.Relation<'manyToMany', 'api::product.product'>;
     publishedAt: Schema.Attribute.DateTime;
     sold_at: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
@@ -542,7 +542,7 @@ export interface ApiProductProduct extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String;
     price: Schema.Attribute.Decimal;
     product_keys: Schema.Attribute.Relation<
-      'oneToMany',
+      'manyToMany',
       'api::product-key.product-key'
     >;
     publishedAt: Schema.Attribute.DateTime;

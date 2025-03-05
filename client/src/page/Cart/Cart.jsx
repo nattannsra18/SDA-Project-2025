@@ -4,12 +4,13 @@ import { FaWindows } from 'react-icons/fa';
 import { BsInfoCircle, BsLightningFill } from 'react-icons/bs';
 import './Cart.css';
 import Swal from 'sweetalert2';
-
+import PurchaseModal from '../../Component/PurchaseModal';
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalQuantity, setTotalQuantity] = useState(0);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
 
   const customSwal = Swal.mixin({
     customClass: {
@@ -55,6 +56,7 @@ const Cart = () => {
             const imageUrl = product.image?.[0]?.formats?.small?.url || product.image?.[0]?.url;
             return {
               id: product.id,
+              documentId: product.documentId,
               name: product.name,
               price: product.price,
               description: product.description,
@@ -64,7 +66,7 @@ const Cart = () => {
               genre: product.genre
             };
           });
-
+          
           setCartItems(products);
           calculateTotal(products);
         } else {
@@ -123,14 +125,14 @@ const Cart = () => {
       );
 
       const userCart = cartResponse.data.data[0];
-
+      console.log("userCart", userCart);
       if (!userCart) {
         console.error('Cart not found for user:', userId);
         return;
       }
 
       const cartDocumentId = userCart.documentId; // ใช้ documentId ที่นี่
-
+      console.log("cartDocumentId", cartDocumentId);
       await axios.put(
         `http://localhost:1337/api/carts/${cartDocumentId}`,
         {
@@ -326,20 +328,22 @@ const Cart = () => {
             </div>
             <button
               className="checkout-btn"
-              onClick={() => customSwal.fire({
-                icon: 'info',
-                title: 'Adventure Awaits',
-                text: 'Secure checkout coming to your journey soon!'
-              })}
+              onClick={() => setIsPurchaseModalOpen(true)}
               disabled={cartItems.length === 0}
             >
               Purchase Now
             </button>
+            <PurchaseModal
+              isOpen={isPurchaseModalOpen}
+              onClose={() => setIsPurchaseModalOpen(false)}
+              totalPrice={totalPrice}
+              cartItems={cartItems}
+            />
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default Cart;
