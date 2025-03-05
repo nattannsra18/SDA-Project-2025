@@ -55,15 +55,17 @@ const TopUp = () => {
     const fetchWalletData = async (userId, token) => {
         try {
             const response = await axios.get(
-                `   `,
+                `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
             );
-
+    
             if (response.data.data.length > 0) {
+                // หากมี wallet อยู่แล้ว ให้ set wallet นั้น
                 setWalletData(response.data.data[0]);
             } else {
+                // หากยังไม่มี wallet ให้สร้าง wallet ใหม่
                 await createNewWallet(userId, token);
             }
         } catch (error) {
@@ -71,7 +73,7 @@ const TopUp = () => {
             setError("Failed to fetch wallet data. Please try again.");
         }
     };
-
+    
     const createNewWallet = async (userId, token) => {
         try {
             const response = await axios.post(
@@ -91,9 +93,11 @@ const TopUp = () => {
                     }
                 }
             );
-
+    
             if (response.data.data) {
-                setWalletData(response.data.data);
+                // ตรวจสอบอีกครั้งก่อน set wallet
+                const newWallet = response.data.data;
+                setWalletData(newWallet);
             }
         } catch (error) {
             console.error("Error creating wallet:", error);
@@ -160,24 +164,54 @@ const TopUp = () => {
             return;
         }
     
-        if (!walletData) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Wallet information not found',
-                background: '#1e1e2a',
-                color: '#ffffff'
-            });
-            return;
-        }
-    
-        const formData = new FormData();
-        formData.append("files", slipImage);
+        const token = sessionStorage.getItem("token");
+        const userId = sessionStorage.getItem("userId");
     
         try {
-            const token = sessionStorage.getItem("token");
+            // ตรวจสอบ wallet ของผู้ใช้ก่อน
+            let currentWallet = walletData;
             
-            // Upload slip image
+            if (!currentWallet) {
+                const walletResponse = await axios.get(
+                    `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
+    
+                if (walletResponse.data.data.length > 0) {
+                    // ใช้ wallet ที่มีอยู่
+                    currentWallet = walletResponse.data.data[0];
+                    setWalletData(currentWallet);
+                } else {
+                    // สร้าง wallet ใหม่เพียงครั้งเดียว
+                    const newWalletResponse = await axios.post(
+                        'http://localhost:1337/api/wallets', 
+                        {
+                            data: {
+                                user: userId,
+                                balance: 0,
+                                wallet_status: true,
+                                transaction_history: []
+                            }
+                        },
+                        {
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${token}` 
+                            }
+                        }
+                    );
+    
+                    currentWallet = newWalletResponse.data.data;
+                    setWalletData(currentWallet);
+                }
+            }
+    
+            const formData = new FormData();
+            formData.append("files", slipImage);
+        
+            // อัปโหลดสลิป
             const uploadResponse = await axios.post(
                 `http://localhost:1337/api/upload`, 
                 formData,
@@ -188,37 +222,35 @@ const TopUp = () => {
                     }
                 }
             );
-    
-            // Calculate new balance
-            const newBalance = walletData.balance + parseFloat(topUpAmount);
+        
+            // คำนวณยอดเงินใหม่
+            const newBalance = currentWallet.balance + parseFloat(topUpAmount);
             
-            // Create current date and time
+            // สร้างรายการธุรกรรม
             const currentDateTime = new Date();
-            
-            // Create transaction with detailed timestamp
             const newTransaction = {
                 type: "top-up",
                 amount: parseFloat(topUpAmount),
                 status: "pending",
-                date: currentDateTime.toISOString().split('T')[0], // Date in YYYY-MM-DD format
+                date: currentDateTime.toISOString().split('T')[0],
                 time: currentDateTime.toLocaleTimeString('en-US', { 
                     hour: '2-digit', 
                     minute: '2-digit', 
                     hour12: true 
-                }), // Time in 12-hour format
-                timestamp: currentDateTime.toISOString() // Full ISO timestamp
+                }),
+                timestamp: currentDateTime.toISOString()
             };
             
-            // Update wallet with new balance, slip image, and transaction history
+            // อัปเดต wallet
             const updateResponse = await axios.put(
-                `http://localhost:1337/api/wallets/${walletData.documentId}`, 
+                `http://localhost:1337/api/wallets/${currentWallet.id}`, 
                 {
                     data: { 
                         slip_image: uploadResponse.data[0].id,
                         balance: newBalance,
                         wallet_status: false,
                         transaction_history: [
-                            ...walletData.transaction_history,
+                            ...currentWallet.transaction_history,
                             newTransaction
                         ]
                     } 
@@ -230,8 +262,8 @@ const TopUp = () => {
                     }
                 }
             );
-    
-            // Close upload slip modal and open processing modal
+        
+            // ปิดโมดอลและโหลดหน้าใหม่
             setIsUploadSlipModalOpen(false);
             setIsProcessingModalOpen(true);
         } catch (error) {
