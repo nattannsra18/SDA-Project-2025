@@ -4,7 +4,8 @@ import { FaWindows } from 'react-icons/fa';
 import { BsInfoCircle, BsLightningFill } from 'react-icons/bs';
 import './Cart.css';
 import Swal from 'sweetalert2';
-import PurchaseModal from '../../Component/PurchaseModal';
+import PurchaseModal from '../../Component/PurchaseModal/PurchaseModal';
+
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +67,7 @@ const Cart = () => {
               genre: product.genre
             };
           });
-          
+
           setCartItems(products);
           calculateTotal(products);
         } else {
@@ -125,14 +126,12 @@ const Cart = () => {
       );
 
       const userCart = cartResponse.data.data[0];
-      console.log("userCart", userCart);
       if (!userCart) {
         console.error('Cart not found for user:', userId);
         return;
       }
 
-      const cartDocumentId = userCart.documentId; // ใช้ documentId ที่นี่
-      console.log("cartDocumentId", cartDocumentId);
+      const cartDocumentId = userCart.documentId;
       await axios.put(
         `http://localhost:1337/api/carts/${cartDocumentId}`,
         {
@@ -194,12 +193,11 @@ const Cart = () => {
             return;
           }
 
-          const cartDocumentId = userCart.documentId; // ใช้ documentId ที่นี่
+          const cartDocumentId = userCart.documentId;
 
           const updatedProducts = userCart.products
             .filter(product => product.id !== productId)
             .map(product => ({ id: product.id }));
-
 
           await axios.put(
             `http://localhost:1337/api/carts/${cartDocumentId}`,
@@ -214,7 +212,6 @@ const Cart = () => {
               },
             }
           );
-
 
           const remainingItems = cartItems.filter(item => item.id !== productId);
           setCartItems(remainingItems);
@@ -239,6 +236,10 @@ const Cart = () => {
 
   const formatNumber = (number) => {
     return number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const handlePurchaseClose = () => {
+    setIsPurchaseModalOpen(false);
   };
 
   if (loading) {
@@ -335,7 +336,7 @@ const Cart = () => {
             </button>
             <PurchaseModal
               isOpen={isPurchaseModalOpen}
-              onClose={() => setIsPurchaseModalOpen(false)}
+              onClose={handlePurchaseClose}
               totalPrice={totalPrice}
               cartItems={cartItems}
             />

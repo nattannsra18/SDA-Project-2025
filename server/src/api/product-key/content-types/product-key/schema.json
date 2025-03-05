@@ -32,7 +32,8 @@
       "type": "datetime"
     },
     "is_used": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
     },
     "products": {
       "type": "relation",

@@ -53,7 +53,7 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product-key.product-key",
-      "inversedBy": "products"
+      "mappedBy": "products"
     }
   }
 }

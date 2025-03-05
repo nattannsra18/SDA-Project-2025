@@ -1,0 +1,44 @@
+.purchase-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #18181C;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+  }
+  
+  .modal-content h2 {
+    font-size: 24px;
+  }
+  
+  .modal-content ul {
+    list-style-type: none;
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .cancel-btn,
+  .confirm-btn {
+    background-color: #0078F2;
+    color: white;
+    border-radius: 4px;
+  }
+  
+  .cancel-btn:hover,
+  .confirm-btn:hover {
+    background-color: #005AC1;
+  }
+  
+  /* Loading Spinner */
+  .loading-spinner {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+  }
+  

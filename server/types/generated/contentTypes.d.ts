@@ -486,7 +486,7 @@ export interface ApiProductKeyProductKey extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    is_used: Schema.Attribute.Boolean;
+    is_used: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     key: Schema.Attribute.String;
     key_status: Schema.Attribute.Enumeration<['available', 'reserved', 'sold']>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
