@@ -55,7 +55,7 @@ const TopUp = () => {
     const fetchWalletData = async (userId, token) => {
         try {
             const response = await axios.get(
-                `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
+                `   `,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
