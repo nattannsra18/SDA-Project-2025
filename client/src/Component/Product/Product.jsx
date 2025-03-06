@@ -261,7 +261,7 @@ const Product = () => {
           </p>
           <p>
             <IoMdCheckmark className="check-icon" />
-            PC 
+            PC (STEAM)
           </p>
         </div>
       </div>

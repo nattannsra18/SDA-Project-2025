@@ -20,14 +20,6 @@
       "target": "plugin::users-permissions.user",
       "inversedBy": "product_keys"
     },
-    "key_status": {
-      "type": "enumeration",
-      "enum": [
-        "available",
-        "reserved",
-        "sold"
-      ]
-    },
     "sold_at": {
       "type": "datetime"
     },

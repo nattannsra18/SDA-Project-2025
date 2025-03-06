@@ -489,7 +489,6 @@ export interface ApiProductKeyProductKey extends Struct.CollectionTypeSchema {
     is_reserved: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     is_used: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     key: Schema.Attribute.String;
-    key_status: Schema.Attribute.Enumeration<['available', 'reserved', 'sold']>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
