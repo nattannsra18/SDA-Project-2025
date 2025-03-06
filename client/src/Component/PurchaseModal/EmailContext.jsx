@@ -20,7 +20,7 @@ export const EmailProvider = ({ children }) => {
     try {
       const response = await axios.post(CLOUD_FUNCTION_URL, {
         email: userEmail,
-        subject: 'Your Game Purchase from GameStore',
+        subject: 'Your Game Purchase from Extreme Chest',
         gameDetails: gameDetails
       });
       
@@ -32,7 +32,7 @@ export const EmailProvider = ({ children }) => {
       return { success: false, error: err.message };
     }
   };
-  
+
   // ค่าที่จะส่งไปยัง Context
   const value = {
     isLoading,
