@@ -14,6 +14,7 @@ import Login from "./page/Login/login";
 import Product  from "./Component/Product/Product";
 import Register from "./page/Register/Register";
 import Home from "./page/Home/Home";
+import { EmailProvider } from "./Component/PurchaseModal/EmailContext"; // นำเข้า EmailProvider
 
 
 const Layout = () => { 
@@ -73,7 +74,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <div className="App">
-       <RouterProvider router={router} />
+      <EmailProvider>
+        <RouterProvider router={router} />
+      </EmailProvider>
     </div>
   );
 }
