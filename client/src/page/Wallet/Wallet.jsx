@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import "./Wallet.css";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
 
 const Wallet = () => {
   const [balance, setBalance] = useState(0);
@@ -18,7 +19,7 @@ const Wallet = () => {
   const fetchWalletDetails = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
+        `${API_URL}/api/wallets?filters[user][id][$eq]=${userId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setBalance(response.data.balance);
@@ -55,7 +56,7 @@ const Wallet = () => {
       });
 
       await axios.post(
-        "http://localhost:1337/api/wallets/topUp",
+        `${API_URL}/api/wallets/topUp`,
         { userId, amount: parseFloat(topUpAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );

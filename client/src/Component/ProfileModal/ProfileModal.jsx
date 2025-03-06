@@ -11,6 +11,8 @@ import {
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
+
 const ProfileModal = ({ userData, walletBalance, onClose, onLogout }) => {
   const [activeTab, setActiveTab] = useState('password');
   const [passwordData, setPasswordData] = useState({
@@ -58,7 +60,7 @@ const ProfileModal = ({ userData, walletBalance, onClose, onLogout }) => {
     try {
       const token = sessionStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:1337/api/auth/change-password",
+        `${API_URL}/api/auth/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           password: passwordData.newPassword,

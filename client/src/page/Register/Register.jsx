@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "./Register.css";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -52,7 +53,7 @@ const Register = () => {
     }
     
     try {
-      const response = await axios.post("http://localhost:1337/api/auth/local/register", {
+      const response = await axios.post(`${API_URL}/api/auth/local/register`, {
         username: formData.username,
         email: formData.email,
         password: formData.password

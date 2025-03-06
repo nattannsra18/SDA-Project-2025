@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import "./All_Product.css";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
 
 const All_Product = () => {
   const [products, setProducts] = useState([]);
@@ -19,7 +20,7 @@ const All_Product = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:1337/api/products?populate=*");
+        const response = await fetch(`${API_URL}/api/products?populate=*`);
         const result = await response.json();
         setProducts(result.data);
         setLoading(false);
@@ -44,7 +45,7 @@ const All_Product = () => {
 
   const getImageUrl = (product) => {
     if (product.image && product.image.length > 0) {
-      return `http://localhost:1337${product.image[0].url}`;
+      return `${API_URL}${product.image[0].url}`;
     }
     return "/product-images/default.jpg";
   };
@@ -107,7 +108,7 @@ const All_Product = () => {
   
       // Fetch user's cart
       const cartResponse = await axios.get(
-        `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
+        `${API_URL}/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -155,7 +156,7 @@ const All_Product = () => {
   
         // Update cart with new product
         await axios.put(
-          `http://localhost:1337/api/carts/${cartDocumentId}`,
+          `${API_URL}/api/carts/${cartDocumentId}`,
           {
             data: {
               products: {
@@ -172,7 +173,7 @@ const All_Product = () => {
       } else {
         // Create new cart
         await axios.post(
-          `http://localhost:1337/api/carts`,
+          `${API_URL}/api/carts`,
           {
             data: {
               cart_owner: userId,

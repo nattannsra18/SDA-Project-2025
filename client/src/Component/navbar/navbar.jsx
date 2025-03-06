@@ -8,6 +8,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
+
 
 const Navbar = () => {
   const location = useLocation();
@@ -21,7 +23,7 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState('account');
   const [walletTransactions, setWalletTransactions] = useState([]);
-
+  
   // State สำหรับการเปลี่ยนรหัสผ่าน
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -39,7 +41,7 @@ const Navbar = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
+          `${API_URL}/api/wallets?filters[user][id][$eq]=${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -126,7 +128,7 @@ const Navbar = () => {
     try {
       const token = sessionStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:1337/api/auth/change-password",
+        `${API_URL}/api/auth/change-password`,
         {
           currentPassword: passwordData.currentPassword,
           password: passwordData.newPassword,
@@ -222,7 +224,7 @@ const Navbar = () => {
     }
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:1337/api/users/me", {
+      const response = await axios.get(`${API_URL}/api/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserData(response.data);

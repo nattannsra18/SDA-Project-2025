@@ -5,6 +5,7 @@ import './PurchaseModal.css';
 import { useNavigate } from "react-router-dom";
 import KeyReservationService from './KeyReservationService';
 import { useEmail } from './EmailContext'; // นำเข้า context
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
 
 const PurchaseModal = ({
   isOpen,
@@ -50,7 +51,7 @@ const PurchaseModal = ({
         }
 
         const walletResponse = await axios.get(
-          `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
+          `${API_URL}/api/wallets?filters[user][id][$eq]=${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -116,7 +117,7 @@ const PurchaseModal = ({
 
       // ดึงอีเมลของผู้ใช้
       const userResponse = await axios.get(
-        `http://localhost:1337/api/users/${userId}?populate=*`,
+        `${API_URL}/api/users/${userId}?populate=*`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -154,7 +155,7 @@ const PurchaseModal = ({
       // Purchase process
       for (const item of cartItems) {
         const productResponse = await axios.get(
-          `http://localhost:1337/api/products?filters[documentId][$eq]=${item.documentId}&populate=product_keys`,
+          `${API_URL}/api/products?filters[documentId][$eq]=${item.documentId}&populate=product_keys`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -186,7 +187,7 @@ const PurchaseModal = ({
 
         // Update product key ownership
         await axios.put(
-          `http://localhost:1337/api/product-keys/${reservedKey.documentId}`,
+          `${API_URL}/api/product-keys/${reservedKey.documentId}`,
           {
             data: {
               owner: userId,
@@ -205,7 +206,7 @@ const PurchaseModal = ({
 
         // Reduce product amount
         await axios.put(
-          `http://localhost:1337/api/products/${product.documentId}`,
+          `${API_URL}/api/products/${product.documentId}`,
           {
             data: {
               amount: product.amount - 1
@@ -221,7 +222,7 @@ const PurchaseModal = ({
 
       // Update wallet balance
       await axios.put(
-        `http://localhost:1337/api/wallets/${walletDocumentId}`,
+        `${API_URL}/api/wallets/${walletDocumentId}`,
         {
           data: {
             balance: (walletBalance - totalPrice).toFixed(2)
@@ -236,7 +237,7 @@ const PurchaseModal = ({
 
       // Clear cart after successful purchase
       const cartResponse = await axios.get(
-        `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}`,
+        `${API_URL}/api/carts?filters[cart_owner][id][$eq]=${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -247,7 +248,7 @@ const PurchaseModal = ({
       const userCart = cartResponse.data.data[0];
       if (userCart) {
         await axios.put(
-          `http://localhost:1337/api/carts/${userCart.documentId}`,
+          `${API_URL}/api/carts/${userCart.documentId}`,
           {
             data: {
               products: null,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./4Product.css";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
 
 const Product_4 = () => {
   const [products, setProducts] = useState([]);
@@ -10,7 +11,7 @@ const Product_4 = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:1337/api/products?populate=*");
+        const response = await fetch(`${API_URL}/api/products?populate=*`);
         const result = await response.json();
         setProducts(result.data);
         setLoading(false);
@@ -25,7 +26,7 @@ const Product_4 = () => {
 
   const getImageUrl = (product) => {
     if (product.image && product.image.length > 0) {
-      return `http://localhost:1337${product.image[0].url}`;
+      return `${API_URL}${product.image[0].url}`;
     }
     return "/product-images/default.jpg";
   };

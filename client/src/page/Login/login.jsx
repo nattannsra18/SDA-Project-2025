@@ -5,6 +5,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "./login.css";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -28,7 +29,7 @@ const Login = () => {
     setSubmitEnabled(false);
   
     try {
-      const response = await axios.post("http://localhost:1337/api/auth/local", {
+      const response = await axios.post(`${API_URL}/api/auth/local`, {
         identifier: credentials.identifier,
         password: credentials.password
       });

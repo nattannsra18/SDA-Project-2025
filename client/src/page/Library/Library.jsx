@@ -9,6 +9,7 @@ import {
 } from 'react-icons/bi';
 import { FaCopy, FaKey } from 'react-icons/fa';
 import './Library.css';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
 
 const Library = () => {
  const [games, setGames] = useState([]);
@@ -54,7 +55,7 @@ const Library = () => {
 
       // Fetch data from the updated endpoint
       const response = await axios.get(
-        `http://localhost:1337/api/product-keys?filters[owner][id][$eq]=${userId}&populate[products][populate]=image`,
+        `${API_URL}/api/product-keys?filters[owner][id][$eq]=${userId}&populate[products][populate]=image`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -73,7 +74,7 @@ const Library = () => {
             id: product?.id,
             name: product?.name,
             description: product?.description,
-            imageUrl: imageUrl ? `http://localhost:1337${imageUrl}` : null,
+            imageUrl: imageUrl ? `${API_URL}${imageUrl}` : null,
             gameKey: item.key,
           };
         });

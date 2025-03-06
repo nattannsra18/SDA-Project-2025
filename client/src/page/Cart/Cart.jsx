@@ -6,6 +6,8 @@ import PurchaseModal from '../../Component/PurchaseModal/PurchaseModal';
 import './Cart.css';
 import KeyReservationService from '../../Component/PurchaseModal/KeyReservationService';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
+
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ const Cart = () => {
         }
 
         const response = await axios.get(
-          `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}&populate[products][populate]=image`,
+          `${API_URL}/api/carts?filters[cart_owner][id][$eq]=${userId}&populate[products][populate]=image`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -62,7 +64,7 @@ const Cart = () => {
               description: product.description,
               age1: product.age1,
               age: product.age,
-              imageUrl: imageUrl ? `http://localhost:1337${imageUrl}` : null,
+              imageUrl: imageUrl ? `${API_URL}${imageUrl}` : null,
               genre: product.genre,
               documentId: product.documentId
             };
@@ -117,7 +119,7 @@ const Cart = () => {
       }
 
       const cartResponse = await axios.get(
-        `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}`,
+        `${API_URL}/api/carts?filters[cart_owner][id][$eq]=${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -135,7 +137,7 @@ const Cart = () => {
       const cartDocumentId = userCart.documentId;
 
       await axios.put(
-        `http://localhost:1337/api/carts/${cartDocumentId}`,
+        `${API_URL}/api/carts/${cartDocumentId}`,
         {
           data: {
             totalPrice: totalPrice.toString(),
@@ -177,7 +179,7 @@ const Cart = () => {
           }
 
           const cartResponse = await axios.get(
-            `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
+            `${API_URL}/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -202,7 +204,7 @@ const Cart = () => {
             .map(product => ({ id: product.id }));
 
           await axios.put(
-            `http://localhost:1337/api/carts/${cartDocumentId}`,
+            `${API_URL}/api/carts/${cartDocumentId}`,
             {
               data: {
                 products: updatedProducts.length > 0 ? updatedProducts : null,
@@ -272,7 +274,7 @@ const Cart = () => {
                 const token = sessionStorage.getItem("token");
                 
                 const cartResponse = await axios.get(
-                  `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
+                  `${API_URL}/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,
@@ -288,7 +290,7 @@ const Cart = () => {
                     .map(product => ({ id: product.id }));
                   
                   await axios.put(
-                    `http://localhost:1337/api/carts/${userCart.documentId}`,
+                    `${API_URL}/api/carts/${userCart.documentId}`,
                     {
                       data: {
                         products: updatedProducts.length > 0 ? updatedProducts : null,

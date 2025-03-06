@@ -5,6 +5,7 @@ import { QRCodeCanvas } from "qrcode.react";
 import generatePayload from "promptpay-qr";
 import Swal from "sweetalert2";
 import axios from "axios";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
 
 const TopUp = () => {
     const [isTopUpAmountModalOpen, setIsTopUpAmountModalOpen] = useState(true);
@@ -26,7 +27,7 @@ const TopUp = () => {
         // Fetch PromptPay ID
         const fetchPromptPayId = async () => {
             try {
-                const response = await axios.get('http://localhost:1337/api/promptpays', {
+                const response = await axios.get(`${API_URL}/api/promptpays`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -55,7 +56,7 @@ const TopUp = () => {
     const fetchWalletData = async (userId, token) => {
         try {
             const response = await axios.get(
-                `http://localhost:1337/api/wallets?filters[user][id][$eq]=${userId}`,
+                `${API_URL}/api/wallets?filters[user][id][$eq]=${userId}`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 }
@@ -75,7 +76,7 @@ const TopUp = () => {
     const createNewWallet = async (userId, token) => {
         try {
             const response = await axios.post(
-                'http://localhost:1337/api/wallets',
+                `${API_URL}/api/wallets`,
                 {
                     data: {
                         user: userId,
@@ -179,7 +180,7 @@ const TopUp = () => {
 
             // Upload slip image
             const uploadResponse = await axios.post(
-                `http://localhost:1337/api/upload`,
+                `${API_URL}/api/upload`,
                 formData,
                 {
                     headers: {
@@ -211,7 +212,7 @@ const TopUp = () => {
 
             // Update wallet with new balance, slip image, and transaction history
             const updateResponse = await axios.put(
-                `http://localhost:1337/api/wallets/${walletData.documentId}`,
+                `${API_URL}/api/wallets/${walletData.documentId}`,
                 {
                     data: {
                         slip_image: uploadResponse.data[0].id,

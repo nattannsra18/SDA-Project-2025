@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import "./Product.css";
 import { IoMdCheckmark } from "react-icons/io";
 import { GiLockedChest } from "react-icons/gi";
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
 
 const Product = () => {
   const { documentId } = useParams();
@@ -14,7 +15,7 @@ const Product = () => {
 
   useEffect(() => {
     fetch(
-      `http://localhost:1337/api/products?filters[documentId][$eq]=${documentId}&populate=*`
+      `${API_URL}/api/products?filters[documentId][$eq]=${documentId}&populate=*`
     )
       .then((response) => response.json())
       .then((data) => {
@@ -84,7 +85,7 @@ const Product = () => {
   
       // Fetch user's cart
       const cartResponse = await axios.get(
-        `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
+        `${API_URL}/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -126,7 +127,7 @@ const Product = () => {
   
         // Update cart with new product
         await axios.put(
-          `http://localhost:1337/api/carts/${cartDocumentId}`,
+          `${API_URL}/api/carts/${cartDocumentId}`,
           {
             data: {
               products: {
@@ -143,7 +144,7 @@ const Product = () => {
       } else {
         // Create new cart
         await axios.post(
-          `http://localhost:1337/api/carts`,
+          `${API_URL}/api/carts`,
           {
             data: {
               cart_owner: userId,
@@ -212,7 +213,7 @@ const Product = () => {
         {productImage && (
           <div className="image-wrapper">
             <img
-              src={`http://localhost:1337${productImage.url}`}
+              src={`${API_URL}${productImage.url}`}
               alt={productImage.alternativeText || product.name}
               onError={(e) => {
                 console.error("Image not found:", e.target.src);

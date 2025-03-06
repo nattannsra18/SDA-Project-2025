@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+// ใช้ environment variable สำหรับ API URL
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
+
 // ระยะเวลาในการจองคีย์ (10 นาที = 600,000 มิลลิวินาที)
 const RESERVATION_TIMEOUT = 600000;
 
@@ -22,7 +25,7 @@ static async reserveKeys(cartItems) {
       for (const item of cartItems) {
         // ดึงข้อมูลคีย์ที่ว่างของเกม
         const productResponse = await axios.get(
-          `http://localhost:1337/api/products?filters[documentId][$eq]=${item.documentId}&populate=product_keys`,
+          `${API_URL}/api/products?filters[documentId][$eq]=${item.documentId}&populate=product_keys`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -62,7 +65,7 @@ static async reserveKeys(cartItems) {
         
         // ตั้งค่า is_reserved เป็น true ที่ backend (Strapi v5)
         await axios.put(
-          `http://localhost:1337/api/product-keys/${selectedKey.documentId}`,
+          `${API_URL}/api/product-keys/${selectedKey.documentId}`,
           {
             data: {
               is_reserved: true,
@@ -122,7 +125,7 @@ static async reserveKeys(cartItems) {
       for (const reservation of reservations) {
         // ตั้งค่า is_reserved เป็น false ที่ backend (Strapi v5)
         await axios.put(
-          `http://localhost:1337/api/product-keys/${reservation.keyId}`,
+          `${API_URL}/api/product-keys/${reservation.keyId}`,
           {
             data: {
               is_reserved: false,
