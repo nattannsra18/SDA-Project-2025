@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import './PurchaseModal.css';
 import { useNavigate } from "react-router-dom";
+import KeyReservationService from './KeyReservationService';
 
 const PurchaseModal = ({ 
   isOpen, 
@@ -16,6 +17,8 @@ const PurchaseModal = ({
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
   const navigate = useNavigate();
+  const [remainingTime, setRemainingTime] = useState(0);
+  const timerRef = useRef(null);
 
   const customSwal = Swal.mixin({
     customClass: {
@@ -74,7 +77,36 @@ const PurchaseModal = ({
     }
   }, [isOpen]);  
 
-  const handlePurchase = async () => {
+  useEffect(() => {
+    if (isOpen) {
+      // อัพเดทเวลาทุกวินาที
+      const updateTimer = () => {
+        const remaining = KeyReservationService.getRemainingTime();
+        setRemainingTime(remaining);
+        
+        if (remaining <= 0) {
+          clearInterval(timerRef.current);
+          handleClose(); // ปิดหน้าต่างเมื่อหมดเวลา
+        }
+      };
+      
+      updateTimer();
+      timerRef.current = setInterval(updateTimer, 1000);
+    }
+    
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isOpen]);
+
+  const handleClose = async () => {
+    await KeyReservationService.releaseKeys();
+    onClose();
+  };
+
+  const originalHandlePurchase = async () => {
     try {
       setProcessingPayment(true);
       const userId = sessionStorage.getItem("userId");
@@ -209,7 +241,6 @@ const PurchaseModal = ({
         }
       });
   
-  
       onClose(); // Close modal after successful purchase
       setProcessingPayment(false);
     } catch (error) {
@@ -220,6 +251,22 @@ const PurchaseModal = ({
         text: 'Unable to complete your purchase. Please try again.'
       });
       setProcessingPayment(false);
+    }
+  };
+  
+  const handlePurchase = async () => {
+    try {
+      await originalHandlePurchase();
+      // ลบข้อมูลการจองเมื่อซื้อสำเร็จ (แต่ไม่ต้องปลดล็อคคีย์)
+      const userId = sessionStorage.getItem("userId");
+      localStorage.removeItem(`reserved_keys_${userId}`);
+      if (window.keyReleaseTimeout) {
+        clearTimeout(window.keyReleaseTimeout);
+      }
+    } catch (error) {
+      // กรณีซื้อไม่สำเร็จ ให้ปลดล็อคคีย์
+      await KeyReservationService.releaseKeys();
+      throw error;
     }
   };
   
@@ -238,7 +285,10 @@ const PurchaseModal = ({
       <div className="purchase-modal">
         <div className="purchase-modal-header">
           <h2>Confirm Your Purchase</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <div className="reservation-timer">
+            Time remaining: {Math.floor(remainingTime / 60000)}:{String(Math.floor((remainingTime % 60000) / 1000)).padStart(2, '0')}
+          </div>
+          <button className="close-btn" onClick={handleClose}>×</button>
         </div>
 
         <div className="purchase-modal-content">
@@ -276,7 +326,7 @@ const PurchaseModal = ({
         <div className="purchase-modal-actions">
           <button 
             className="cancel-btn" 
-            onClick={onClose}
+            onClick={handleClose}
             disabled={processingPayment}
           >
             Cancel

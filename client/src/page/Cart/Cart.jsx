@@ -4,6 +4,7 @@ import { BsInfoCircle } from 'react-icons/bs';
 import Swal from 'sweetalert2';
 import PurchaseModal from '../../Component/PurchaseModal/PurchaseModal';
 import './Cart.css';
+import KeyReservationService from '../../Component/PurchaseModal/KeyReservationService';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -243,9 +244,20 @@ const Cart = () => {
     return <div className="loading">Summoning your cart...</div>;
   }
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cartItems.length > 0) {
-      setIsPurchaseModalOpen(true);
+      // จองคีย์ก่อนเปิด PurchaseModal
+      const reservationSuccess = await KeyReservationService.reserveKeys(cartItems);
+      
+      if (reservationSuccess) {
+        setIsPurchaseModalOpen(true);
+      } else {
+        customSwal.fire({
+          icon: 'error',
+          title: 'Reservation Failed',
+          text: 'Could not reserve game keys. Please try again.'
+        });
+      }
     } else {
       customSwal.fire({
         icon: 'info',
@@ -254,6 +266,7 @@ const Cart = () => {
       });
     }
   };
+  
 
   return (
     <div className="cart-page">

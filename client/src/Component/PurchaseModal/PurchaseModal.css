@@ -1,3 +1,25 @@
+.reservation-timer {
+  font-size: 0.9rem;
+  color: #FFA500;
+  background-color: rgba(255, 165, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* เมื่อเหลือเวลาน้อยกว่า 1 นาที */
+.reservation-timer.urgent {
+  color: #FF3A3A;
+  background-color: rgba(255, 58, 58, 0.1);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
 .purchase-modal-overlay {
   position: fixed;
   top: 0;
