@@ -486,6 +486,7 @@ export interface ApiProductKeyProductKey extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    is_reserved: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     is_used: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     key: Schema.Attribute.String;
     key_status: Schema.Attribute.Enumeration<['available', 'reserved', 'sold']>;
@@ -501,6 +502,8 @@ export interface ApiProductKeyProductKey extends Struct.CollectionTypeSchema {
     >;
     products: Schema.Attribute.Relation<'manyToMany', 'api::product.product'>;
     publishedAt: Schema.Attribute.DateTime;
+    reservation_expires: Schema.Attribute.DateTime;
+    reserved_by: Schema.Attribute.String;
     sold_at: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

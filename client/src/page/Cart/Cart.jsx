@@ -246,16 +246,90 @@ const Cart = () => {
 
   const handleCheckout = async () => {
     if (cartItems.length > 0) {
-      // จองคีย์ก่อนเปิด PurchaseModal
-      const reservationSuccess = await KeyReservationService.reserveKeys(cartItems);
-      
-      if (reservationSuccess) {
-        setIsPurchaseModalOpen(true);
-      } else {
+      try {
+        // จองคีย์ก่อนเปิด PurchaseModal
+        const result = await KeyReservationService.reserveKeys(cartItems);
+        
+        if (result.success) {
+          setIsPurchaseModalOpen(true);
+        } else if (result.unavailableItems && result.unavailableItems.length > 0) {
+          // มีเกมบางเกมที่จองคีย์ไม่ได้
+          const outOfStockItems = result.unavailableItems.filter(item => item.isOutOfStock);
+          const reservedItems = result.unavailableItems.filter(item => !item.isOutOfStock);
+          
+          if (outOfStockItems.length > 0) {
+            // มีเกมที่ไม่มีคีย์เหลือแล้ว
+            const itemNames = outOfStockItems.map(item => item.name).join(', ');
+            customSwal.fire({
+              icon: 'error',
+              title: 'Items Out of Stock',
+              text: `${itemNames} ${outOfStockItems.length > 1 ? 'are' : 'is'} out of stock and will be removed from your cart.`,
+              confirmButtonText: 'OK'
+            }).then(async () => {
+              // ลบเกมที่ไม่มีคีย์ออกจากตะกร้า
+              try {
+                const userId = sessionStorage.getItem("userId");
+                const token = sessionStorage.getItem("token");
+                
+                const cartResponse = await axios.get(
+                  `http://localhost:1337/api/carts?filters[cart_owner][id][$eq]=${userId}&populate=products`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
+                
+                const userCart = cartResponse.data.data[0];
+                if (userCart) {
+                  const itemIdsToRemove = outOfStockItems.map(item => item.id);
+                  const updatedProducts = userCart.products
+                    .filter(product => !itemIdsToRemove.includes(product.id))
+                    .map(product => ({ id: product.id }));
+                  
+                  await axios.put(
+                    `http://localhost:1337/api/carts/${userCart.documentId}`,
+                    {
+                      data: {
+                        products: updatedProducts.length > 0 ? updatedProducts : null,
+                      }
+                    },
+                    {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  );
+                  
+                  // อัพเดตสถานะการแสดงผล
+                  const remainingItems = cartItems.filter(item => !itemIdsToRemove.includes(item.id));
+                  setCartItems(remainingItems);
+                  calculateTotal(remainingItems);
+                }
+              } catch (error) {
+                console.error('Error removing out-of-stock items:', error);
+              }
+            });
+          }
+          
+          if (reservedItems.length > 0) {
+            // มีเกมที่ถูกจองโดยผู้ใช้อื่น
+            const itemNames = reservedItems.map(item => item.name).join(', ');
+            customSwal.fire({
+              icon: 'warning',
+              title: 'Items Currently Reserved',
+              text: `${itemNames} ${reservedItems.length > 1 ? 'are' : 'is'} currently being purchased by another user. Please try again later.`
+            });
+          }
+        } else {
+          throw new Error(result.error || "Reservation failed");
+        }
+      } catch (error) {
+        console.error("Checkout error:", error);
         customSwal.fire({
           icon: 'error',
-          title: 'Reservation Failed',
-          text: 'Could not reserve game keys. Please try again.'
+          title: 'Checkout Failed',
+          text: 'There was an error processing your checkout. Please try again.'
         });
       }
     } else {
@@ -266,6 +340,7 @@ const Cart = () => {
       });
     }
   };
+  
   
 
   return (

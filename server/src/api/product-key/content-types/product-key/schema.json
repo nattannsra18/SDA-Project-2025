@@ -40,6 +40,16 @@
       "relation": "manyToMany",
       "target": "api::product.product",
       "inversedBy": "product_keys"
+    },
+    "is_reserved": {
+      "type": "boolean",
+      "default": false
+    },
+    "reservation_expires": {
+      "type": "datetime"
+    },
+    "reserved_by": {
+      "type": "string"
     }
   }
 }

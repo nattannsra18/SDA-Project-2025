@@ -14,7 +14,6 @@ const PurchaseModal = ({
   const [walletBalance, setWalletBalance] = useState(0);
   const [walletStatus, setWalletStatus] = useState(false);
   const [walletDocumentId, setWalletDocumentId] = useState(null);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [processingPayment, setProcessingPayment] = useState(false);
   const navigate = useNavigate();
   const [remainingTime, setRemainingTime] = useState(0);
@@ -106,7 +105,7 @@ const PurchaseModal = ({
     onClose();
   };
 
-  const originalHandlePurchase = async () => {
+  const handlePurchase = async () => {
     try {
       setProcessingPayment(true);
       const userId = sessionStorage.getItem("userId");
@@ -146,21 +145,31 @@ const PurchaseModal = ({
         );
         const product = productResponse.data.data[0];
         
-        // Filter unused product keys
+        // Filter unused and unreserved product keys
         const availableKeys = product.product_keys.filter(key => key.is_used === false);
         if (availableKeys.length === 0) {
           throw new Error(`No available keys for product ${item.name}`);
         }
   
-        const selectedKey = availableKeys[0];
+        // Get the reserved key for this user
+        const reservedKey = availableKeys.find(key => 
+          key.is_reserved === true && key.reserved_by === userId
+        );
+        
+        if (!reservedKey) {
+          throw new Error(`No reserved key found for product ${item.name}`);
+        }
   
         // Update product key ownership
         await axios.put(
-          `http://localhost:1337/api/product-keys/${selectedKey.documentId}`,
+          `http://localhost:1337/api/product-keys/${reservedKey.documentId}`,
           {
             data: {
               owner: userId,
-              is_used: true
+              is_used: true,
+              is_reserved: true,
+              reserved_by: null,
+              reservation_expires: null
             }
           },
           {
@@ -230,6 +239,12 @@ const PurchaseModal = ({
         );
       }
   
+      // ลบข้อมูลการจองเมื่อซื้อสำเร็จ (แต่ไม่ต้องปลดล็อคคีย์)
+      localStorage.removeItem(`reserved_keys_${userId}`);
+      if (window.keyReleaseTimeout) {
+        clearTimeout(window.keyReleaseTimeout);
+      }
+  
       customSwal.fire({
         icon: 'success',
         title: 'Purchase Successful',
@@ -250,32 +265,11 @@ const PurchaseModal = ({
         title: 'Purchase Failed',
         text: 'Unable to complete your purchase. Please try again.'
       });
-      setProcessingPayment(false);
-    }
-  };
-  
-  const handlePurchase = async () => {
-    try {
-      await originalHandlePurchase();
-      // ลบข้อมูลการจองเมื่อซื้อสำเร็จ (แต่ไม่ต้องปลดล็อคคีย์)
-      const userId = sessionStorage.getItem("userId");
-      localStorage.removeItem(`reserved_keys_${userId}`);
-      if (window.keyReleaseTimeout) {
-        clearTimeout(window.keyReleaseTimeout);
-      }
-    } catch (error) {
+      
       // กรณีซื้อไม่สำเร็จ ให้ปลดล็อคคีย์
       await KeyReservationService.releaseKeys();
-      throw error;
+      setProcessingPayment(false);
     }
-  };
-  
-  const openConfirmationModal = () => {
-    setIsConfirmationModalOpen(true);
-  };
-
-  const closeConfirmationModal = () => {
-    setIsConfirmationModalOpen(false);
   };
   
   if (!isOpen) return null;
@@ -333,58 +327,13 @@ const PurchaseModal = ({
           </button>
           <button 
             className="confirm-btn" 
-            onClick={openConfirmationModal}
+            onClick={handlePurchase}
             disabled={processingPayment || !walletStatus || walletBalance < totalPrice}
           >
             Confirm Purchase
           </button>
         </div>
       </div>
-
-      {isConfirmationModalOpen && (
-        <div className="confirmation-modal-overlay">
-          <div className="confirmation-modal">
-            <div className="confirmation-modal-header">
-              <h2>Confirm Order</h2>
-              <button className="close-btn" onClick={closeConfirmationModal}>×</button>
-            </div>
-            
-            <div className="confirmation-modal-content">
-              <p>Are you sure you want to complete this purchase?</p>
-              
-              <div className="order-confirmation-summary">
-                <h3>Order Summary</h3>
-                {cartItems.map((item) => (
-                  <div key={item.id} className="confirmation-item">
-                    <span>{item.name}</span>
-                    <span>THB {item.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  </div>
-                ))}
-                <div className="confirmation-total">
-                  <strong>Total:</strong>
-                  <strong>THB {totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
-                </div>
-              </div>
-            </div>
-
-            <div className="confirmation-modal-actions">
-              <button 
-                onClick={closeConfirmationModal}
-                className="cancel-btn"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handlePurchase}
-                className="confirm-btn"
-                disabled={processingPayment}
-              >
-                {processingPayment ? 'Processing...' : 'Confirm'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

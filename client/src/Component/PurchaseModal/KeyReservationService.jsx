@@ -5,7 +5,8 @@ const RESERVATION_TIMEOUT = 600000;
 
 class KeyReservationService {
   // จองคีย์เกมเมื่อผู้ใช้กดปุ่ม Purchase Now
-  static async reserveKeys(cartItems) {
+// จองคีย์เกมเมื่อผู้ใช้กดปุ่ม Purchase Now
+static async reserveKeys(cartItems) {
     try {
       const userId = sessionStorage.getItem("userId");
       const token = sessionStorage.getItem("token");
@@ -15,6 +16,7 @@ class KeyReservationService {
       }
       
       const reservations = [];
+      const unavailableItems = [];
       
       // วนลูปสำหรับแต่ละเกมในตะกร้า
       for (const item of cartItems) {
@@ -31,9 +33,17 @@ class KeyReservationService {
         const product = productResponse.data.data[0];
         
         // ตรวจสอบว่ามีคีย์ที่ว่างหรือไม่
-        const availableKeys = product.product_keys.filter(key => key.is_used === false);
+        const availableKeys = product.product_keys.filter(key => key.is_used === false && key.is_reserved === false);
         if (availableKeys.length === 0) {
-          throw new Error(`No available keys for product ${item.name}`);
+          // เก็บข้อมูลเกมที่ไม่มีคีย์ว่าง
+          const reservedKeys = product.product_keys.filter(key => key.is_used === false && key.is_reserved === true);
+          unavailableItems.push({
+            id: item.id,
+            name: item.name,
+            documentId: product.documentId,
+            isOutOfStock: reservedKeys.length === 0 // true ถ้าไม่มีคีย์เลย (คีย์ถูกใช้ไปหมด)
+          });
+          continue;
         }
         
         // เลือกคีย์แรกที่ว่าง
@@ -50,27 +60,22 @@ class KeyReservationService {
         
         reservations.push(reservation);
         
-        // เพิ่มฟิลด์ is_reserved ที่คีย์ (ถ้า backend รองรับ)
-        // ถ้าไม่รองรับให้ข้ามส่วนนี้ไป
-        try {
-          await axios.put(
-            `http://localhost:1337/api/product-keys/${selectedKey.documentId}`,
-            {
-              data: {
-                is_reserved: true,
-                reserved_by: userId,
-                reservation_expires: new Date(reservation.expiresAt).toISOString()
-              }
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+        // ตั้งค่า is_reserved เป็น true ที่ backend (Strapi v5)
+        await axios.put(
+          `http://localhost:1337/api/product-keys/${selectedKey.documentId}`,
+          {
+            data: {
+              is_reserved: true,
+              reserved_by: userId,
+              reservation_expires: new Date(reservation.expiresAt).toISOString()
             }
-          );
-        } catch (error) {
-          console.log("Backend might not support reservation fields, continuing with client-side reservation");
-        }
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
       }
       
       // บันทึกข้อมูลการจองลงใน localStorage
@@ -79,10 +84,15 @@ class KeyReservationService {
       // ตั้งเวลาปลดล็อคอัตโนมัติ
       this.setAutoReleaseTimeout(userId);
       
-      return true;
+      // ถ้ามีเกมที่ไม่สามารถจองได้ ส่งกลับเป็น error
+      if (unavailableItems.length > 0) {
+        return { success: false, unavailableItems };
+      }
+      
+      return { success: true };
     } catch (error) {
       console.error("Error reserving keys:", error);
-      return false;
+      return { success: false, error: error.message };
     }
   }
   
@@ -110,31 +120,28 @@ class KeyReservationService {
       
       // วนลูปปลดล็อคแต่ละคีย์
       for (const reservation of reservations) {
-        try {
-          await axios.put(
-            `http://localhost:1337/api/product-keys/${reservation.keyId}`,
-            {
-              data: {
-                is_reserved: false,
-                reserved_by: null,
-                reservation_expires: null
-              }
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
+        // ตั้งค่า is_reserved เป็น false ที่ backend (Strapi v5)
+        await axios.put(
+          `http://localhost:1337/api/product-keys/${reservation.keyId}`,
+          {
+            data: {
+              is_reserved: false,
+              reserved_by: null,
+              reservation_expires: null
             }
-          );
-        } catch (error) {
-          console.log("Backend might not support reservation fields, continuing with client-side release");
-        }
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
       }
       
       // ลบข้อมูลการจองจาก localStorage
       localStorage.removeItem(`reserved_keys_${userId}`);
       
-      // ยกเลิกการตั้งเวลาปลดล็อคอัตโนมัติ (ถ้ามี)
+      // ยกเลิกการตั้งเวลาปลดล็อคอัตโนมัติ 
       if (window.keyReleaseTimeout) {
         clearTimeout(window.keyReleaseTimeout);
       }
@@ -148,7 +155,7 @@ class KeyReservationService {
   
   // ตั้งเวลาปลดล็อคอัตโนมัติ
   static setAutoReleaseTimeout(userId) {
-    // ยกเลิกการตั้งเวลาเดิม (ถ้ามี)
+    // ยกเลิกการตั้งเวลาเดิม 
     if (window.keyReleaseTimeout) {
       clearTimeout(window.keyReleaseTimeout);
     }
